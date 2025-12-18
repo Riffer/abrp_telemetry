@@ -1,0 +1,12 @@
+{
+    "domain": "abrp_telemetry",
+    "name": "ABRP Telemetry",
+    "codeowners": [],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/your-repo/homeassistant-abrp-telemetry",
+    "integration_type": "service",
+    "iot_class": "cloud_push",
+    "requirements": ["aiohttp>=3.8.0"],
+    "version": "1.0.0"
+}
