@@ -91,12 +91,16 @@ class ABRPTelemetryService:
 
     async def async_start(self):
         """Start the telemetry service."""
+        _LOGGER.debug("ABRP Telemetry: async_start() called")
+        
         # Validate configuration before starting
         if not self._validate_configuration():
             _LOGGER.error("ABRP Telemetry: Configuration incomplete - service not started")
             return False
         
-        _LOGGER.info(f"Starting ABRP Telemetry Service with interval of {self.update_interval} seconds")
+        _LOGGER.info(f"ABRP Telemetry: Starting service with {self.update_interval}s interval")
+        _LOGGER.debug(f"ABRP Telemetry: Car model: {self.car_model}")
+        _LOGGER.debug(f"ABRP Telemetry: Entity mappings: {self.entity_map}")
         
         # Create HTTP session
         self._session = aiohttp.ClientSession()
@@ -108,8 +112,11 @@ class ABRPTelemetryService:
             timedelta(seconds=self.update_interval)
         )
         
+        _LOGGER.debug("ABRP Telemetry: Timer registered, sending first telemetry...")
+        
         # Send first telemetry immediately
         await self._async_send_telemetry()
+        _LOGGER.info("ABRP Telemetry: Service started successfully")
         return True
     
     @property
@@ -372,6 +379,13 @@ class ABRPTelemetryService:
             self._handle_soft_error("SOC not available")
             return
         
+        # Log telemetry values at info level for visibility
+        _LOGGER.info(f"ABRP Telemetry sending: SOC={telemetry.get('soc')}%, "
+                     f"Speed={telemetry.get('speed', 'N/A')} km/h, "
+                     f"Power={telemetry.get('power', 'N/A')} kW, "
+                     f"Charging={telemetry.get('is_charging', 'N/A')}")
+        _LOGGER.debug(f"ABRP Telemetry full data: {telemetry}")
+        
         try:
             # Build URL with parameters
             params = {
@@ -385,13 +399,12 @@ class ABRPTelemetryService:
             
             url = f"{ABRP_API_URL}?{urlencode(params)}"
             
-            _LOGGER.debug(f"Sending telemetry to ABRP: {telemetry}")
-            
             async with self._session.post(url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status == 200:
                     result = await response.json()
                     if result.get("status") == "ok":
-                        _LOGGER.debug("Telemetry successfully sent to ABRP")
+                        self._total_sends += 1
+                        _LOGGER.info(f"ABRP Telemetry: Successfully sent (total: {self._total_sends})")
                         self._handle_success()
                     else:
                         _LOGGER.warning(f"ABRP response: {result}")
@@ -425,7 +438,7 @@ class ABRPTelemetryService:
         self._consecutive_errors = 0
         self._current_backoff = INITIAL_BACKOFF_SECONDS
         self._last_successful_send = time.time()
-        self._total_sends += 1
+        # Note: _total_sends is incremented before calling this method
         
         # If paused, re-enable
         if self._is_paused:

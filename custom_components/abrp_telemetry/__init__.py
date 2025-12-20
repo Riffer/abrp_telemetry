@@ -27,6 +27,9 @@ if DEBUG_MODE:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ABRP Telemetry from a config entry."""
+    _LOGGER.info("ABRP Telemetry: Setting up integration...")
+    _LOGGER.debug(f"ABRP Telemetry: Config entry data: {entry.data}")
+    
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = entry.data
     
@@ -48,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Load platforms (Switch)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
-    _LOGGER.info("ABRP Telemetry Integration started successfully")
+    _LOGGER.info("ABRP Telemetry: Integration setup complete")
     return True
 
 
