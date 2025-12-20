@@ -313,18 +313,126 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         """Initialize options flow."""
         self.config_entry = config_entry
+        self._data = dict(config_entry.data)
 
     async def async_step_init(self, user_input=None):
-        """Manage the options."""
+        """Step 1: Basic settings and required entities."""
+        errors = {}
+        
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            if not user_input.get(CONF_SOC_ENTITY):
+                errors[CONF_SOC_ENTITY] = "soc_entity_required"
+            
+            if not errors:
+                self._data.update(user_input)
+                return await self.async_step_options_advanced()
+
+        # Get current values from config
+        current = self.config_entry.data
+
+        data_schema = vol.Schema({
+            vol.Optional(
+                CONF_UPDATE_INTERVAL,
+                default=current.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+            ): vol.All(vol.Coerce(int), vol.Range(min=5, max=60)),
+            vol.Required(
+                CONF_SOC_ENTITY,
+                default=current.get(CONF_SOC_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_SPEED_ENTITY,
+                default=current.get(CONF_SPEED_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_POSITION_ENTITY,
+                default=current.get(CONF_POSITION_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["device_tracker", "sensor"])
+            ),
+            vol.Optional(
+                CONF_POWER_ENTITY,
+                default=current.get(CONF_POWER_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_CHARGING_ENTITY,
+                default=current.get(CONF_CHARGING_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain=["sensor", "binary_sensor"])
+            ),
+            vol.Optional(
+                CONF_RANGE_ENTITY,
+                default=current.get(CONF_RANGE_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_ODOMETER_ENTITY,
+                default=current.get(CONF_ODOMETER_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+        })
 
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema({
-                vol.Optional(
-                    CONF_UPDATE_INTERVAL,
-                    default=self.config_entry.data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
-                ): vol.All(vol.Coerce(int), vol.Range(min=5, max=60)),
-            })
+            data_schema=data_schema,
+            errors=errors,
+        )
+
+    async def async_step_options_advanced(self, user_input=None):
+        """Step 2: Advanced entity mappings."""
+        if user_input is not None:
+            self._data.update(user_input)
+            # Update the config entry with new data
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=self._data
+            )
+            return self.async_create_entry(title="", data={})
+
+        # Get current values from config
+        current = self.config_entry.data
+
+        data_schema = vol.Schema({
+            vol.Optional(
+                CONF_SOH_ENTITY,
+                default=current.get(CONF_SOH_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_VOLTAGE_ENTITY,
+                default=current.get(CONF_VOLTAGE_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_CURRENT_ENTITY,
+                default=current.get(CONF_CURRENT_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_BATT_TEMP_ENTITY,
+                default=current.get(CONF_BATT_TEMP_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Optional(
+                CONF_EXT_TEMP_ENTITY,
+                default=current.get(CONF_EXT_TEMP_ENTITY, "")
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+        })
+
+        return self.async_show_form(
+            step_id="options_advanced",
+            data_schema=data_schema,
         )

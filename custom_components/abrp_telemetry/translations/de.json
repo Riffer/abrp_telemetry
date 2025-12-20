@@ -63,11 +63,33 @@
     "options": {
         "step": {
             "init": {
-                "title": "ABRP Telemetry Optionen",
+                "title": "ABRP Telemetry - Grundeinstellungen",
+                "description": "Aktualisiere deine Sensor-Zuordnungen.",
                 "data": {
-                    "update_interval": "Update Interval (Sekunden)"
+                    "update_interval": "Update Interval (Sekunden)",
+                    "soc_entity": "Ladezustand (SOC) - Erforderlich",
+                    "speed_entity": "Geschwindigkeit",
+                    "position_entity": "Position (device_tracker)",
+                    "power_entity": "Leistung (kW)",
+                    "charging_entity": "Ladestatus",
+                    "range_entity": "Geschätzte Reichweite",
+                    "odometer_entity": "Kilometerstand"
+                }
+            },
+            "options_advanced": {
+                "title": "ABRP Telemetry - Erweiterte Sensoren",
+                "description": "Zusätzliche Sensoren für genauere Vorhersagen.",
+                "data": {
+                    "soh_entity": "Batteriegesundheit (SOH)",
+                    "voltage_entity": "Batteriespannung",
+                    "current_entity": "Batteriestrom",
+                    "batt_temp_entity": "Batterietemperatur",
+                    "ext_temp_entity": "Außentemperatur"
                 }
             }
+        },
+        "error": {
+            "soc_entity_required": "SOC Entity ist erforderlich"
         }
     },
     "entity": {
