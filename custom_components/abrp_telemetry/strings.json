@@ -64,7 +64,7 @@
         "step": {
             "init": {
                 "title": "ABRP Telemetry - Basic Settings",
-                "description": "Update your sensor mappings.",
+                "description": "Update your sensor mappings.\n\n**Current values:**\n{current_values}",
                 "data": {
                     "update_interval": "Update Interval (seconds)",
                     "soc_entity": "State of Charge (SOC) - Required",
@@ -78,7 +78,7 @@
             },
             "options_advanced": {
                 "title": "ABRP Telemetry - Advanced Sensors",
-                "description": "Additional sensors for more accurate predictions.",
+                "description": "Additional sensors for more accurate predictions.\n\n**Current values:**\n{current_values}",
                 "data": {
                     "soh_entity": "State of Health (SOH)",
                     "voltage_entity": "Battery Voltage",

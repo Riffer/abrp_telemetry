@@ -315,6 +315,29 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
         self.config_entry = config_entry
         self._data = dict(config_entry.data)
 
+    def _get_entity_value(self, entity_id: str) -> str:
+        """Get the current value of an entity."""
+        if not entity_id:
+            return "—"
+        state = self.hass.states.get(entity_id)
+        if state is None:
+            return "nicht gefunden"
+        if state.state in ("unknown", "unavailable"):
+            return state.state
+        # Include unit if available
+        unit = state.attributes.get("unit_of_measurement", "")
+        return f"{state.state} {unit}".strip()
+
+    def _build_current_values_text(self, entities: list[tuple[str, str]]) -> str:
+        """Build a formatted text showing current entity values."""
+        lines = []
+        for label, entity_key in entities:
+            entity_id = self.config_entry.data.get(entity_key, "")
+            if entity_id:
+                value = self._get_entity_value(entity_id)
+                lines.append(f"• {label}: **{value}**")
+        return "\n".join(lines) if lines else "Keine Entitäten konfiguriert"
+
     async def async_step_init(self, user_input=None):
         """Step 1: Basic settings and required entities."""
         errors = {}
@@ -329,6 +352,17 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
 
         # Get current values from config
         current = self.config_entry.data
+        
+        # Build current values display
+        current_values = self._build_current_values_text([
+            ("SOC", CONF_SOC_ENTITY),
+            ("Speed", CONF_SPEED_ENTITY),
+            ("Position", CONF_POSITION_ENTITY),
+            ("Power", CONF_POWER_ENTITY),
+            ("Charging", CONF_CHARGING_ENTITY),
+            ("Range", CONF_RANGE_ENTITY),
+            ("Odometer", CONF_ODOMETER_ENTITY),
+        ])
 
         data_schema = vol.Schema({
             vol.Optional(
@@ -383,6 +417,7 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
             step_id="init",
             data_schema=data_schema,
             errors=errors,
+            description_placeholders={"current_values": current_values},
         )
 
     async def async_step_options_advanced(self, user_input=None):
@@ -398,6 +433,15 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
 
         # Get current values from config
         current = self.config_entry.data
+        
+        # Build current values display for advanced entities
+        current_values = self._build_current_values_text([
+            ("SOH", CONF_SOH_ENTITY),
+            ("Voltage", CONF_VOLTAGE_ENTITY),
+            ("Current", CONF_CURRENT_ENTITY),
+            ("Battery Temp", CONF_BATT_TEMP_ENTITY),
+            ("Ext Temp", CONF_EXT_TEMP_ENTITY),
+        ])
 
         data_schema = vol.Schema({
             vol.Optional(
@@ -435,4 +479,5 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="options_advanced",
             data_schema=data_schema,
+            description_placeholders={"current_values": current_values},
         )
