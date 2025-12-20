@@ -5,6 +5,11 @@ DOMAIN = "abrp_telemetry"
 # API Configuration
 ABRP_API_URL = "https://api.iternio.com/1/tlm/send"
 
+# Debug Mode - Setze auf True für erweiterte Logs und optional Remote Debugging
+# ACHTUNG: Nicht in Produktion aktivieren!
+DEBUG_MODE = False
+DEBUG_REMOTE_PORT = 5678  # Port für debugpy (VS Code Remote Attach)
+
 # Configuration Keys
 CONF_API_KEY = "api_key"
 CONF_USER_TOKEN = "user_token"

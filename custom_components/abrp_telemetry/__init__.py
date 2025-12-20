@@ -4,11 +4,25 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import DOMAIN, DEBUG_MODE, DEBUG_REMOTE_PORT
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["switch"]
+
+# Debug-Modus initialisieren
+if DEBUG_MODE:
+    _LOGGER.warning("ABRP Telemetry DEBUG MODE ist aktiviert!")
+    try:
+        import debugpy
+        debugpy.listen(("0.0.0.0", DEBUG_REMOTE_PORT))
+        _LOGGER.info(f"debugpy wartet auf Verbindung auf Port {DEBUG_REMOTE_PORT}")
+        # Uncomment um auf Debugger zu warten:
+        # debugpy.wait_for_client()
+    except ImportError:
+        _LOGGER.warning("debugpy nicht installiert - Remote Debugging nicht verfügbar")
+    except Exception as e:
+        _LOGGER.warning(f"debugpy konnte nicht gestartet werden: {e}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
