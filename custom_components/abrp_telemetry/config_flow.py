@@ -304,16 +304,15 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return ABRPTelemetryOptionsFlow(config_entry)
+        return ABRPTelemetryOptionsFlow()
 
 
 class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
     """Handle options flow for ABRP Telemetry."""
 
-    def __init__(self, config_entry):
+    def __init__(self):
         """Initialize options flow."""
-        self.config_entry = config_entry
-        self._data = dict(config_entry.data)
+        self._data = {}
 
     def _get_entity_value(self, entity_id: str) -> str:
         """Get the current value of an entity."""
@@ -341,6 +340,10 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Step 1: Basic settings and required entities."""
         errors = {}
+        
+        # Initialize _data from config_entry on first call
+        if not self._data:
+            self._data = dict(self.config_entry.data)
         
         if user_input is not None:
             if not user_input.get(CONF_SOC_ENTITY):
