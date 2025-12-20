@@ -53,6 +53,9 @@ class ABRPTelemetryService:
         self._unsub_timer = None
         self._session: Optional[aiohttp.ClientSession] = None
         
+        # Ein/Aus-Schalter Status
+        self._is_enabled = True  # Standardmäßig aktiviert
+        
         # Fehlerbehandlungs-Status
         self._consecutive_errors = 0
         self._is_paused = False
@@ -106,6 +109,25 @@ class ABRPTelemetryService:
         # Sofort erste Telemetrie senden
         await self._async_send_telemetry()
         return True
+    
+    @property
+    def is_enabled(self) -> bool:
+        """Return whether the service is enabled."""
+        return self._is_enabled
+    
+    def enable(self):
+        """Enable telemetry upload."""
+        self._is_enabled = True
+        # Reset error state when manually enabled
+        self._consecutive_errors = 0
+        self._is_paused = False
+        self._current_backoff = INITIAL_BACKOFF_SECONDS
+        _LOGGER.info("ABRP Telemetry Upload wurde aktiviert")
+    
+    def disable(self):
+        """Disable telemetry upload."""
+        self._is_enabled = False
+        _LOGGER.info("ABRP Telemetry Upload wurde deaktiviert")
     
     def _validate_configuration(self) -> bool:
         """Prüfe ob die Konfiguration vollständig ist."""
@@ -252,6 +274,11 @@ class ABRPTelemetryService:
 
     async def _async_send_telemetry(self, now=None):
         """Sende Telemetriedaten an ABRP."""
+        # Prüfe ob Service vom Benutzer deaktiviert wurde
+        if not self._is_enabled:
+            _LOGGER.debug("ABRP Telemetry ist deaktiviert (Schalter aus)")
+            return
+        
         # Prüfe ob Service pausiert ist (nach zu vielen Fehlern)
         if self._is_paused:
             _LOGGER.debug("ABRP Telemetry ist pausiert wegen vorheriger Fehler")
@@ -394,7 +421,8 @@ class ABRPTelemetryService:
     def get_status(self) -> dict:
         """Gibt den aktuellen Status des Services zurück."""
         return {
-            "is_running": not self._is_paused and self._session is not None,
+            "is_enabled": self._is_enabled,
+            "is_running": self._is_enabled and not self._is_paused and self._session is not None,
             "is_paused": self._is_paused,
             "consecutive_errors": self._consecutive_errors,
             "total_sends": self._total_sends,

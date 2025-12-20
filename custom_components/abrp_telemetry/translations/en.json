@@ -43,5 +43,26 @@
                 }
             }
         }
+    },
+    "entity": {
+        "switch": {
+            "abrp_telemetry_upload": {
+                "name": "Upload enabled",
+                "state_attributes": {
+                    "is_paused": {
+                        "name": "Paused"
+                    },
+                    "consecutive_errors": {
+                        "name": "Consecutive errors"
+                    },
+                    "total_sends": {
+                        "name": "Total data sent"
+                    },
+                    "total_errors": {
+                        "name": "Total errors"
+                    }
+                }
+            }
+        }
     }
 }

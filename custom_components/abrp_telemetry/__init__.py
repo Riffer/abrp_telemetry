@@ -8,7 +8,7 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = []
+PLATFORMS = ["switch"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -31,16 +31,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "config": entry.data
     }
     
+    # Plattformen laden (Switch)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    
     _LOGGER.info("ABRP Telemetry Integration erfolgreich gestartet")
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    # Plattformen entladen
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    
     if entry.entry_id in hass.data[DOMAIN]:
         service = hass.data[DOMAIN][entry.entry_id].get("service")
         if service:
             await service.async_stop()
         hass.data[DOMAIN].pop(entry.entry_id)
     
-    return True
+    return unload_ok
