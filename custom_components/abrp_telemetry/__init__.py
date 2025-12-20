@@ -20,7 +20,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     from .telemetry import ABRPTelemetryService
     
     service = ABRPTelemetryService(hass, entry.data)
-    await service.async_start()
+    started = await service.async_start()
+    
+    if not started:
+        _LOGGER.error("ABRP Telemetry Service konnte nicht gestartet werden - Konfiguration prüfen")
+        return False
     
     hass.data[DOMAIN][entry.entry_id] = {
         "service": service,
