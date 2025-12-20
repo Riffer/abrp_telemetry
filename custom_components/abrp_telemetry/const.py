@@ -20,8 +20,9 @@ CONF_UPDATE_INTERVAL = "update_interval"
 # Works with any Home Assistant vehicle integration (mb2020, PSA, Tesla, etc.)
 CONF_SOC_ENTITY = "soc_entity"
 CONF_SPEED_ENTITY = "speed_entity"
-CONF_LATITUDE_ENTITY = "latitude_entity"
-CONF_LONGITUDE_ENTITY = "longitude_entity"
+CONF_POSITION_ENTITY = "position_entity"  # device_tracker or sensor with lat/lon attributes
+CONF_LATITUDE_ENTITY = "latitude_entity"  # Legacy - kept for backwards compatibility
+CONF_LONGITUDE_ENTITY = "longitude_entity"  # Legacy - kept for backwards compatibility
 CONF_POWER_ENTITY = "power_entity"
 CONF_CHARGING_ENTITY = "charging_entity"
 CONF_EXT_TEMP_ENTITY = "ext_temp_entity"

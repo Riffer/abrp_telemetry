@@ -19,6 +19,7 @@ from .const import (
     CONF_UPDATE_INTERVAL,
     CONF_SOC_ENTITY,
     CONF_SPEED_ENTITY,
+    CONF_POSITION_ENTITY,
     CONF_LATITUDE_ENTITY,
     CONF_LONGITUDE_ENTITY,
     CONF_POWER_ENTITY,
@@ -73,8 +74,9 @@ class ABRPTelemetryService:
         self.entity_map = {
             "soc": config.get(CONF_SOC_ENTITY),
             "speed": config.get(CONF_SPEED_ENTITY),
-            "lat": config.get(CONF_LATITUDE_ENTITY),
-            "lon": config.get(CONF_LONGITUDE_ENTITY),
+            "position": config.get(CONF_POSITION_ENTITY),  # New: single position entity
+            "lat": config.get(CONF_LATITUDE_ENTITY),  # Legacy support
+            "lon": config.get(CONF_LONGITUDE_ENTITY),  # Legacy support
             "power": config.get(CONF_POWER_ENTITY),
             "is_charging": config.get(CONF_CHARGING_ENTITY),
             "ext_temp": config.get(CONF_EXT_TEMP_ENTITY),
@@ -181,13 +183,24 @@ class ABRPTelemetryService:
         """Get latitude and longitude from configured entities.
         
         Supports:
-        - Separate lat/lon sensor entities
-        - device_tracker entities (lat/lon as attributes)
+        - New: Single position entity (device_tracker with lat/lon attributes)
+        - Legacy: Separate lat/lon sensor entities
         - Any entity with latitude/longitude attributes
         """
         lat = None
         lon = None
         
+        # New: Check position_entity first (preferred)
+        position_entity = self.entity_map.get("position")
+        if position_entity:
+            state = self.hass.states.get(position_entity)
+            if state and state.attributes:
+                lat = state.attributes.get("latitude")
+                lon = state.attributes.get("longitude")
+                if lat is not None and lon is not None:
+                    return (float(lat), float(lon))
+        
+        # Legacy support: separate lat/lon entities
         lat_entity = self.entity_map.get("lat")
         lon_entity = self.entity_map.get("lon")
         

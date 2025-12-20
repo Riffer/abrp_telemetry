@@ -2,33 +2,50 @@
     "config": {
         "step": {
             "user": {
-                "title": "ABRP Telemetry Configuration",
-                "description": "Configure the connection to A Better Route Planner.\n\nYou need an API key (contact contact@iternio.com) and a user token from the ABRP app.\n\nFind your car model at: https://api.iternio.com/1/tlm/get_carmodels_list",
+                "title": "ABRP Telemetry - Credentials",
+                "description": "Configure the connection to A Better Route Planner.\n\nYou need an API key (contact contact@iternio.com) and a user token from the ABRP app.",
                 "data": {
                     "api_key": "ABRP API Key",
                     "user_token": "ABRP User Token",
-                    "car_model": "Car Model (e.g., tesla:model3:19:75:lr)",
-                    "update_interval": "Update Interval (seconds)",
-                    "soc_entity": "State of Charge (SOC) Entity",
-                    "speed_entity": "Speed Entity",
-                    "latitude_entity": "Latitude Entity",
-                    "longitude_entity": "Longitude Entity",
-                    "power_entity": "Power (kW) Entity",
-                    "charging_entity": "Is Charging Entity",
-                    "ext_temp_entity": "Outside Temperature Entity",
-                    "batt_temp_entity": "Battery Temperature Entity",
-                    "odometer_entity": "Odometer Entity",
-                    "range_entity": "Range Entity",
-                    "soh_entity": "State of Health (SOH) Entity",
-                    "voltage_entity": "Voltage Entity",
-                    "current_entity": "Current Entity"
+                    "update_interval": "Update Interval (seconds)"
+                }
+            },
+            "car_model": {
+                "title": "ABRP Telemetry - Vehicle Selection",
+                "description": "Select your vehicle from the list or enter the model ID manually.\n\nManual lookup: {car_models_url}",
+                "data": {
+                    "car_model": "Vehicle Model"
+                }
+            },
+            "entities_basic": {
+                "title": "ABRP Telemetry - Basic Sensors",
+                "description": "Map your vehicle sensors to ABRP data fields.\n\nSOC is required, all others are optional but recommended.",
+                "data": {
+                    "soc_entity": "State of Charge (SOC) - Required",
+                    "speed_entity": "Speed",
+                    "position_entity": "Position (device_tracker)",
+                    "power_entity": "Power (kW)",
+                    "charging_entity": "Charging Status",
+                    "range_entity": "Estimated Range",
+                    "odometer_entity": "Odometer"
+                }
+            },
+            "entities_advanced": {
+                "title": "ABRP Telemetry - Advanced Sensors",
+                "description": "Additional sensors for more accurate predictions.\n\nThese are optional - skip if not available.",
+                "data": {
+                    "soh_entity": "State of Health (SOH)",
+                    "voltage_entity": "Battery Voltage",
+                    "current_entity": "Battery Current",
+                    "batt_temp_entity": "Battery Temperature",
+                    "ext_temp_entity": "Outside Temperature"
                 }
             }
         },
         "error": {
             "api_key_required": "API Key is required",
             "user_token_required": "User Token is required",
-            "car_model_required": "Car Model is required (e.g., tesla:model3:19:75:lr)",
+            "car_model_required": "Vehicle model is required",
             "soc_entity_required": "SOC Entity is required"
         },
         "abort": {
