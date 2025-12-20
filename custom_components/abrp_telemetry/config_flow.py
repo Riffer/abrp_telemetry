@@ -44,33 +44,35 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            # Validierung
+            # Validation
             if not user_input.get(CONF_API_KEY):
                 errors[CONF_API_KEY] = "api_key_required"
             elif not user_input.get(CONF_USER_TOKEN):
                 errors[CONF_USER_TOKEN] = "user_token_required"
+            elif not user_input.get(CONF_CAR_MODEL):
+                errors[CONF_CAR_MODEL] = "car_model_required"
             elif not user_input.get(CONF_SOC_ENTITY):
                 errors[CONF_SOC_ENTITY] = "soc_entity_required"
             
             if not errors:
                 return self.async_create_entry(
-                    title=f"ABRP Telemetry ({user_input.get(CONF_CAR_MODEL, DEFAULT_CAR_MODEL)})",
+                    title=f"ABRP Telemetry ({user_input.get(CONF_CAR_MODEL, 'EV')})",
                     data=user_input
                 )
 
-        # Schema für das Konfigurationsformular
+        # Schema for configuration form
         data_schema = vol.Schema({
             vol.Required(CONF_API_KEY): str,
             vol.Required(CONF_USER_TOKEN): str,
-            vol.Optional(CONF_CAR_MODEL, default=DEFAULT_CAR_MODEL): str,
+            vol.Required(CONF_CAR_MODEL): str,  # Car model is required
             vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): vol.All(
                 vol.Coerce(int), vol.Range(min=5, max=60)
             ),
-            # Pflicht-Entities
+            # Required entities
             vol.Required(CONF_SOC_ENTITY): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="sensor")
             ),
-            # Optionale Entities
+            # Optional entities
             vol.Optional(CONF_SPEED_ENTITY): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="sensor")
             ),

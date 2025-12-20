@@ -3,11 +3,11 @@
         "step": {
             "user": {
                 "title": "ABRP Telemetry Konfiguration",
-                "description": "Konfiguriere die Verbindung zu A Better Route Planner.\n\nDu benötigst einen API-Key (kontaktiere contact@iternio.com) und einen User Token aus der ABRP App.",
+                "description": "Konfiguriere die Verbindung zu A Better Route Planner.\n\nDu benötigst einen API-Key (kontaktiere contact@iternio.com) und einen User Token aus der ABRP App.\n\nFinde dein Fahrzeugmodell unter: https://api.iternio.com/1/tlm/get_carmodels_list",
                 "data": {
                     "api_key": "ABRP API Key",
                     "user_token": "ABRP User Token",
-                    "car_model": "Fahrzeugmodell (z.B. mercedes:eqa:22:67:other)",
+                    "car_model": "Fahrzeugmodell (z.B. tesla:model3:19:75:lr)",
                     "update_interval": "Update Interval (Sekunden)",
                     "soc_entity": "Ladezustand (SOC) Entity",
                     "speed_entity": "Geschwindigkeit Entity",
@@ -28,6 +28,7 @@
         "error": {
             "api_key_required": "API Key ist erforderlich",
             "user_token_required": "User Token ist erforderlich",
+            "car_model_required": "Fahrzeugmodell ist erforderlich (z.B. tesla:model3:19:75:lr)",
             "soc_entity_required": "SOC Entity ist erforderlich"
         },
         "abort": {

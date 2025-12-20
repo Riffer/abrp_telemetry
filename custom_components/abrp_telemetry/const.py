@@ -5,10 +5,10 @@ DOMAIN = "abrp_telemetry"
 # API Configuration
 ABRP_API_URL = "https://api.iternio.com/1/tlm/send"
 
-# Debug Mode - Setze auf True für erweiterte Logs und optional Remote Debugging
-# ACHTUNG: Nicht in Produktion aktivieren!
+# Debug Mode - Set to True for extended logs and optional remote debugging
+# WARNING: Do not enable in production!
 DEBUG_MODE = False
-DEBUG_REMOTE_PORT = 5678  # Port für debugpy (VS Code Remote Attach)
+DEBUG_REMOTE_PORT = 5678  # Port for debugpy (VS Code Remote Attach)
 
 # Configuration Keys
 CONF_API_KEY = "api_key"
@@ -16,8 +16,8 @@ CONF_USER_TOKEN = "user_token"
 CONF_CAR_MODEL = "car_model"
 CONF_UPDATE_INTERVAL = "update_interval"
 
-# Entity IDs für Mercedes mb2020 Integration
-# Diese müssen an deine tatsächlichen Entity-IDs angepasst werden!
+# Entity Configuration Keys
+# Works with any Home Assistant vehicle integration (mb2020, PSA, Tesla, etc.)
 CONF_SOC_ENTITY = "soc_entity"
 CONF_SPEED_ENTITY = "speed_entity"
 CONF_LATITUDE_ENTITY = "latitude_entity"
@@ -33,9 +33,12 @@ CONF_VOLTAGE_ENTITY = "voltage_entity"
 CONF_CURRENT_ENTITY = "current_entity"
 
 # Default Values
-DEFAULT_UPDATE_INTERVAL = 5  # Sekunden - ABRP empfiehlt 5 Sekunden
-DEFAULT_CAR_MODEL = "mercedes:eqa:22:67:other"  # Mercedes EQA 250 (66.5 kWh nutzbar)
+DEFAULT_UPDATE_INTERVAL = 5  # Seconds - ABRP recommends 5 seconds
+DEFAULT_CAR_MODEL = ""  # User must specify their car model from ABRP
 
-# Mercedes EQA 250 Spezifikationen (für Referenz)
-# Batteriekapazität: 66.5 kWh (nutzbar)
-# Brutto-Kapazität: ~70 kWh
+# Find your car model at: https://api.iternio.com/1/tlm/get_carmodels_list
+# Examples:
+#   Mercedes EQA 250: mercedes:eqa:22:67:other
+#   Peugeot e-208: peugeot:e208:20:50:other
+#   Tesla Model 3 LR: tesla:model3:19:75:lr
+#   Hyundai Ioniq 5: hyundai:ioniq5:21:77:awd

@@ -1,70 +1,85 @@
-# ABRP Telemetry Integration für Home Assistant
+# ABRP Telemetry Integration for Home Assistant
 
-Diese Custom Integration sendet Telemetriedaten deines Elektrofahrzeugs an [A Better Route Planner (ABRP)](https://abetterrouteplanner.com/).
+This custom integration sends telemetry data from your electric vehicle to [A Better Route Planner (ABRP)](https://abetterrouteplanner.com/).
 
 ## Features
 
-- ✅ Automatische Übertragung von Fahrzeugdaten an ABRP
-- ✅ Konfigurierbares Update-Intervall (Standard: 5 Sekunden)
-- ✅ **Ein/Aus-Schalter** für manuelle Kontrolle und Automationen
-- ✅ **Robuste Fehlerbehandlung** mit automatischer Pause bei Problemen
-- ✅ Unterstützt alle wichtigen Telemetrie-Parameter
-- ✅ Optimiert für Mercedes EQA 250 mit mb2020 Integration
+- ✅ Automatic transmission of vehicle data to ABRP
+- ✅ Configurable update interval (default: 5 seconds)
+- ✅ **On/Off switch** for manual control and automations
+- ✅ **Robust error handling** with automatic pause on failures
+- ✅ Supports all important telemetry parameters
+- ✅ Works with **any Home Assistant vehicle integration** that provides the required sensor data
 
-## Schnellübersicht
+## Supported Vehicle Integrations
 
-| Was | Wo |
-|-----|-----|
+This integration works with any Home Assistant integration that provides EV telemetry data, including:
+
+| Integration | Vehicles | Notes |
+|-------------|----------|-------|
+| **Mercedes me 2020 (mb2020)** | All Mercedes EQ models | EQA, EQB, EQC, EQE, EQS, etc. |
+| **PSA Car Controller** | Peugeot, Citroën, Opel, DS | e-208, e-2008, Corsa-e, etc. |
+| **Hyundai/Kia Connect** | Hyundai, Kia, Genesis | Ioniq 5/6, EV6, GV60, etc. |
+| **Tesla Custom Integration** | All Tesla models | Model 3, Y, S, X |
+| **BMW Connected Drive** | BMW iX, i4, i7, etc. | |
+| **Volkswagen We Connect** | VW ID.3, ID.4, ID.5, etc. | |
+| **Renault** | Zoe, Megane E-Tech, etc. | |
+| **Any other** | Any EV | As long as SOC sensor is available |
+
+## Quick Reference
+
+| Item | Location |
+|------|----------|
 | **Switch Entity** | `switch.abrp_telemetry_upload` |
-| **Logs** | Einstellungen → System → Protokolle |
-| **Status-Attribute** | Entwicklerwerkzeuge → Zustände → switch.abrp_telemetry_upload |
-| **Konfiguration** | Einstellungen → Geräte & Dienste → ABRP Telemetry |
+| **Logs** | Settings → System → Logs |
+| **Status Attributes** | Developer Tools → States → switch.abrp_telemetry_upload |
+| **Configuration** | Settings → Devices & Services → ABRP Telemetry |
 
-## Funktionsweise
+## How It Works
 
-Die Integration arbeitet vollautomatisch:
+The integration runs fully automatically:
 
-1. **Nach der Einrichtung** startet automatisch ein Hintergrund-Service
-2. **Alle 5 Sekunden** (konfigurierbar) werden die aktuellen Werte deiner konfigurierten Sensoren ausgelesen
-3. **Die Daten werden direkt** an die ABRP-API (`api.iternio.com`) gesendet
-4. **ABRP verarbeitet** die Daten und zeigt sie in der App/Website an
+1. **After setup**, a background service starts automatically
+2. **Every 5 seconds** (configurable), current values from your configured sensors are read
+3. **Data is sent directly** to the ABRP API (`api.iternio.com`)
+4. **ABRP processes** the data and displays it in the app/website
 
-**Es ist kein manueller Start erforderlich!** Sobald die Integration eingerichtet ist, läuft der Daten-Upload automatisch.
+**No manual start required!** Once configured, the data upload runs automatically.
 
-### Fehlerbehandlung
+### Error Handling
 
-Die Integration ist robust gegen Fehler:
+The integration is robust against failures:
 
-| Situation | Verhalten |
-|-----------|-----------|
-| Netzwerkfehler | Wartet und versucht es erneut |
-| 10 Fehler in Folge | Pausiert automatisch (10s → 20s → 40s → max 5min) |
-| Auth-Fehler (401) | Pausiert für 10 Minuten |
-| SOC nicht verfügbar | Überspringt Zyklus, warnt im Log |
-| Service manuell deaktiviert | Sendet nichts bis wieder aktiviert |
+| Situation | Behavior |
+|-----------|----------|
+| Network error | Waits and retries |
+| 10 consecutive errors | Pauses automatically (10s → 20s → 40s → max 5min) |
+| Auth error (401) | Pauses for 10 minutes |
+| SOC unavailable | Skips cycle, warns in log |
+| Service manually disabled | Sends nothing until re-enabled |
 
 ---
 
 ## Installation
 
-### HACS (empfohlen)
+### HACS (Recommended)
 
-1. Öffne HACS in Home Assistant
-2. Klicke auf "Integrationen"
-3. Klicke auf das Drei-Punkte-Menü (⋮) oben rechts
-4. Wähle "Benutzerdefinierte Repositories"
-5. Füge die Repository-URL hinzu: `https://github.com/Riffer/abrp_telemetry`
-6. Kategorie: "Integration"
-7. Klicke "Hinzufügen"
-8. Suche nach "ABRP Telemetry" und klicke "Herunterladen"
-9. **Starte Home Assistant neu**
+1. Open HACS in Home Assistant
+2. Click "Integrations"
+3. Click the three-dot menu (⋮) in the top right
+4. Select "Custom repositories"
+5. Add repository URL: `https://github.com/Riffer/abrp_telemetry`
+6. Category: "Integration"
+7. Click "Add"
+8. Search for "ABRP Telemetry" and click "Download"
+9. **Restart Home Assistant**
 
-### Manuelle Installation
+### Manual Installation
 
-1. Lade dieses Repository herunter (Code → Download ZIP)
-2. Entpacke die ZIP-Datei
-3. Kopiere den Ordner `custom_components/abrp_telemetry` in deinen Home Assistant `config/custom_components/` Ordner
-4. Deine Ordnerstruktur sollte so aussehen:
+1. Download this repository (Code → Download ZIP)
+2. Extract the ZIP file
+3. Copy the `custom_components/abrp_telemetry` folder to your Home Assistant `config/custom_components/` folder
+4. Your folder structure should look like this:
    ```
    config/
    └── custom_components/
@@ -74,158 +89,182 @@ Die Integration ist robust gegen Fehler:
            ├── const.py
            ├── manifest.json
            ├── strings.json
+           ├── switch.py
            ├── telemetry.py
            └── translations/
                ├── de.json
                └── en.json
    ```
-5. **Starte Home Assistant neu**
+5. **Restart Home Assistant**
 
 ---
 
-## Voraussetzungen (WICHTIG!)
+## Prerequisites (IMPORTANT!)
 
-### 1. ABRP API Key besorgen
+### 1. Get ABRP API Key
 
-Du benötigst einen **kostenlosen Telemetry API-Key** von Iternio:
+You need a **free Telemetry API Key** from Iternio:
 
-1. Schreibe eine E-Mail an: **contact@iternio.com**
-2. Betreff: "ABRP Telemetry API Key Request"
-3. Inhalt: Beschreibe kurz, dass du die Home Assistant Integration nutzen möchtest
-4. Du erhältst den API-Key normalerweise innerhalb von 1-2 Werktagen
+1. Send an email to: **contact@iternio.com**
+2. Subject: "ABRP Telemetry API Key Request"
+3. Content: Briefly describe that you want to use the Home Assistant integration
+4. You'll typically receive the API key within 1-2 business days
 
-### 2. User Token aus ABRP holen
+### 2. Get User Token from ABRP
 
-1. Öffne die **ABRP App** auf deinem Smartphone (oder die Webseite)
-2. Gehe zu: **Einstellungen** (⚙️)
-3. Wähle: **Car Settings** → **Your Car** (oder dein Fahrzeugname)
-4. Scrolle nach unten zu: **Generic**
-5. Tippe auf: **Show Token**
-6. Kopiere den angezeigten Token (langer alphanumerischer String)
+1. Open the **ABRP App** on your smartphone (or the website)
+2. Go to: **Settings** (⚙️)
+3. Select: **Car Settings** → **Your Car** (or your vehicle name)
+4. Scroll down to: **Generic**
+5. Tap: **Show Token**
+6. Copy the displayed token (long alphanumeric string)
 
-### 3. Car Model ID herausfinden
+### 3. Find Your Car Model ID
 
-Für die individuelle Verbrauchsberechnung benötigt ABRP das genaue Fahrzeugmodell:
+ABRP needs the exact vehicle model for accurate consumption calculations.
 
-| Fahrzeug | Car Model ID |
-|----------|--------------|
-| Mercedes EQA 250 (2022+) | `mercedes:eqa:22:67:other` |
-| Mercedes EQA 300 4MATIC | `mercedes:eqa:22:67:4matic` |
-| Mercedes EQA 350 4MATIC | `mercedes:eqa:22:91:4matic` |
+**Find your model at:** [ABRP Car Models List](https://api.iternio.com/1/tlm/get_carmodels_list)
 
-Weitere Modelle findest du in der [ABRP Fahrzeugliste](https://api.iternio.com/1/tlm/get_carmodels_list).
+**Common examples:**
 
----
-
-## Einrichtung in Home Assistant
-
-### Schritt für Schritt
-
-1. Gehe zu: **Einstellungen** → **Geräte & Dienste**
-2. Klicke auf: **+ Integration hinzufügen** (unten rechts)
-3. Suche nach: **"ABRP Telemetry"**
-4. Fülle das Formular aus:
-
-   | Feld | Beschreibung |
-   |------|--------------|
-   | **API Key** | Dein Iternio API-Key (von contact@iternio.com) |
-   | **User Token** | Dein ABRP User Token (aus der App) |
-   | **Car Model** | Dein Fahrzeugmodell (z.B. `mercedes:eqa:22:67:other`) |
-   | **Update Interval** | Sekunden zwischen Uploads (5-60, Standard: 5) |
-   | **SOC Entity** | **PFLICHT:** Sensor für Ladezustand (%) |
-   | **Speed Entity** | Optional: Sensor für Geschwindigkeit (km/h) |
-   | **Latitude/Longitude** | Optional: GPS-Position |
-   | **Power Entity** | Optional: Momentanleistung (kW) |
-   | **Charging Entity** | Optional: Ladestatus (on/off) |
-   | ... | Weitere optionale Sensoren |
-
-5. Klicke **"Absenden"**
-
-### Was passiert nach der Einrichtung?
-
-✅ Die Integration startet **sofort automatisch**  
-✅ Alle X Sekunden werden Daten an ABRP gesendet  
-✅ Du siehst einen Log-Eintrag: "ABRP Telemetry Integration erfolgreich gestartet"  
-✅ In ABRP sollten nach ca. 1 Minute deine Live-Daten erscheinen
+| Vehicle | Car Model ID |
+|---------|--------------|
+| Mercedes EQA 250 | `mercedes:eqa:22:67:other` |
+| Mercedes EQS 450+ | `mercedes:eqs:22:108:other` |
+| Peugeot e-208 | `peugeot:e208:20:50:other` |
+| Hyundai Ioniq 5 LR AWD | `hyundai:ioniq5:21:77:awd` |
+| Tesla Model 3 LR | `tesla:model3:19:75:lr` |
+| VW ID.4 Pro | `volkswagen:id4:21:77:pro` |
 
 ---
 
-## Entity Mapping für Mercedes mb2020
+## Setup in Home Assistant
 
-Typische Entity-IDs für die mb2020 Integration:
+### Step by Step
 
-| Parameter | Beispiel Entity | Hinweis |
-|-----------|-----------------|---------|
-| SOC (Ladezustand) | `sensor.mercedes_eqa_soc` | **Pflichtfeld!** |
-| Geschwindigkeit | `sensor.mercedes_eqa_speed` | Für Verbrauchsberechnung |
-| Position | `device_tracker.mercedes_eqa` | Oder separate lat/lon Sensoren |
-| Leistung | `sensor.mercedes_eqa_power` | Für Verbrauchsberechnung |
-| Ladestatus | `binary_sensor.mercedes_eqa_charging` | 0/1 oder on/off |
-| Außentemperatur | `sensor.mercedes_eqa_outside_temp` | Für Reichweitenprognose |
-| Kilometerstand | `sensor.mercedes_eqa_odometer` | Wird in km erwartet |
-| Reichweite | `sensor.mercedes_eqa_range` | Geschätzte Reichweite |
+1. Go to: **Settings** → **Devices & Services**
+2. Click: **+ Add Integration** (bottom right)
+3. Search for: **"ABRP Telemetry"**
+4. Fill out the form:
 
-**Tipp**: Prüfe deine verfügbaren Entities unter:  
-**Entwicklerwerkzeuge** → **Zustände** → Suche nach "mercedes" oder "eqa"
+   | Field | Description |
+   |-------|-------------|
+   | **API Key** | Your Iternio API Key (from contact@iternio.com) |
+   | **User Token** | Your ABRP User Token (from the app) |
+   | **Car Model** | Your vehicle model ID (e.g., `mercedes:eqa:22:67:other`) |
+   | **Update Interval** | Seconds between uploads (5-60, default: 5) |
+   | **SOC Entity** | **REQUIRED:** Sensor for state of charge (%) |
+   | **Speed Entity** | Optional: Sensor for speed (km/h) |
+   | **Latitude/Longitude** | Optional: GPS position |
+   | **Power Entity** | Optional: Instantaneous power (kW) |
+   | **Charging Entity** | Optional: Charging status (on/off) |
+   | ... | Additional optional sensors |
+
+5. Click **"Submit"**
+
+### What Happens After Setup?
+
+✅ The integration starts **immediately and automatically**  
+✅ Every X seconds, data is sent to ABRP  
+✅ You'll see a log entry: "ABRP Telemetry Integration started successfully"  
+✅ Your live data should appear in ABRP within ~1 minute
 
 ---
 
-## Parameter-Erklärung
+## Entity Mapping Examples
 
-| Parameter | Beschreibung | Einheit |
-|-----------|--------------|---------|
-| `utc` | UTC Timestamp | Sekunden (Epoch) |
+### Mercedes (mb2020 Integration)
+
+| Parameter | Example Entity |
+|-----------|----------------|
+| SOC | `sensor.my_mercedes_soc` |
+| Speed | `sensor.my_mercedes_speed` |
+| Position | `device_tracker.my_mercedes` |
+| Power | `sensor.my_mercedes_power` |
+| Charging | `binary_sensor.my_mercedes_charging` |
+| Odometer | `sensor.my_mercedes_odometer` |
+| Range | `sensor.my_mercedes_range` |
+
+### PSA (Peugeot/Citroën/Opel)
+
+| Parameter | Example Entity |
+|-----------|----------------|
+| SOC | `sensor.my_peugeot_battery_level` |
+| Position | `device_tracker.my_peugeot` |
+| Charging | `binary_sensor.my_peugeot_charging` |
+| Range | `sensor.my_peugeot_electric_range` |
+| Odometer | `sensor.my_peugeot_mileage` |
+
+### Generic
+
+| Parameter | Example Entity |
+|-----------|----------------|
+| SOC | `sensor.ev_battery_level` |
+| Speed | `sensor.ev_speed` |
+| Power | `sensor.ev_power_consumption` |
+| Charging | `binary_sensor.ev_charging` |
+
+**Tip:** Check your available entities under:  
+**Developer Tools** → **States** → Search for your vehicle name
+
+---
+
+## Parameter Reference
+
+| Parameter | Description | Unit |
+|-----------|-------------|------|
+| `utc` | UTC Timestamp | Seconds (Epoch) |
 | `soc` | State of Charge | % |
-| `speed` | Geschwindigkeit | km/h |
-| `lat` / `lon` | GPS Position | Grad |
-| `power` | Momentanleistung (+ = Entladen, - = Laden) | kW |
-| `is_charging` | Lädt das Fahrzeug | 0/1 |
-| `ext_temp` | Außentemperatur | °C |
-| `batt_temp` | Batterietemperatur | °C |
+| `speed` | Speed | km/h |
+| `lat` / `lon` | GPS Position | Degrees |
+| `power` | Instantaneous power (+ = discharge, - = charge) | kW |
+| `is_charging` | Vehicle charging | 0/1 |
+| `ext_temp` | Outside temperature | °C |
+| `batt_temp` | Battery temperature | °C |
 | `soh` | State of Health | % |
-| `odometer` | Kilometerstand | km |
-| `est_battery_range` | Geschätzte Reichweite | km |
-| `voltage` | Batteriespannung | V |
-| `current` | Batteriestrom | A |
+| `odometer` | Odometer | km |
+| `est_battery_range` | Estimated range | km |
+| `voltage` | Battery voltage | V |
+| `current` | Battery current | A |
 
-## Update-Intervall
+## Update Interval
 
-ABRP empfiehlt einen Datenpunkt alle **5 Sekunden** für beste Ergebnisse. Weniger als alle 30 Sekunden wird nicht empfohlen.
+ABRP recommends a data point every **5 seconds** for best results. Less than every 30 seconds is not recommended.
 
-Für die individuelle Verbrauchskalibrierung benötigt ABRP mindestens `speed`, `power` und `is_charging` alle 10 Sekunden.
+For individual consumption calibration, ABRP needs at least `speed`, `power`, and `is_charging` every 10 seconds.
 
 ---
 
-## Ein/Aus-Schalter
+## On/Off Switch
 
-Nach der Einrichtung wird automatisch ein Switch erstellt:
+After setup, a switch is automatically created:
 
 **Entity:** `switch.abrp_telemetry_upload`
 
-| Zustand | Bedeutung |
-|---------|-----------|
-| **ON** | Upload aktiv - Daten werden alle X Sekunden gesendet |
-| **OFF** | Upload pausiert - Keine Daten werden gesendet |
+| State | Meaning |
+|-------|---------|
+| **ON** | Upload active - Data sent every X seconds |
+| **OFF** | Upload paused - No data sent |
 
-### Verwendung in Automationen
+### Using in Automations
 
-**Beispiel 1: Upload nur während der Fahrt**
+**Example 1: Upload only while driving**
 ```yaml
 automation:
-  - alias: "ABRP nur bei Fahrt"
+  - alias: "ABRP on when driving"
     trigger:
       - platform: numeric_state
-        entity_id: sensor.mercedes_eqa_speed
+        entity_id: sensor.my_car_speed  # Replace with your speed sensor
         above: 0
     action:
       - service: switch.turn_on
         target:
           entity_id: switch.abrp_telemetry_upload
 
-  - alias: "ABRP aus wenn geparkt"
+  - alias: "ABRP off when parked"
     trigger:
       - platform: numeric_state
-        entity_id: sensor.mercedes_eqa_speed
+        entity_id: sensor.my_car_speed  # Replace with your speed sensor
         below: 1
         for:
           minutes: 5
@@ -235,13 +274,13 @@ automation:
           entity_id: switch.abrp_telemetry_upload
 ```
 
-**Beispiel 2: Upload beim Laden aktivieren**
+**Example 2: Enable upload when charging**
 ```yaml
 automation:
-  - alias: "ABRP beim Laden"
+  - alias: "ABRP on when charging"
     trigger:
       - platform: state
-        entity_id: binary_sensor.mercedes_eqa_charging
+        entity_id: binary_sensor.my_car_charging  # Replace with your charging sensor
         to: "on"
     action:
       - service: switch.turn_on
@@ -249,10 +288,10 @@ automation:
           entity_id: switch.abrp_telemetry_upload
 ```
 
-**Beispiel 3: Nachts deaktivieren**
+**Example 3: Disable at night**
 ```yaml
 automation:
-  - alias: "ABRP nachts aus"
+  - alias: "ABRP off at night"
     trigger:
       - platform: time
         at: "23:00:00"
@@ -261,7 +300,7 @@ automation:
         target:
           entity_id: switch.abrp_telemetry_upload
 
-  - alias: "ABRP morgens an"
+  - alias: "ABRP on in morning"
     trigger:
       - platform: time
         at: "06:00:00"
@@ -275,9 +314,9 @@ automation:
 
 ## Troubleshooting
 
-### Logging aktivieren
+### Enable Logging
 
-Füge folgendes zu deiner `configuration.yaml` hinzu:
+Add the following to your `configuration.yaml`:
 
 ```yaml
 logger:
@@ -286,38 +325,38 @@ logger:
     custom_components.abrp_telemetry: debug
 ```
 
-### Häufige Probleme
+### Common Problems
 
-1. **Keine Daten in ABRP sichtbar**: 
-   - Das ABRP-Backend verarbeitet Daten in 60-Sekunden-Batches
-   - Warte mindestens 1-2 Minuten nach der Einrichtung
-   - Prüfe die Logs auf Fehler
+1. **No data visible in ABRP**: 
+   - The ABRP backend processes data in 60-second batches
+   - Wait at least 1-2 minutes after setup
+   - Check logs for errors
 
-2. **SOC nicht verfügbar**: 
-   - Stelle sicher, dass die mb2020 Integration läuft und Daten liefert
-   - Prüfe den Entity-Status unter Entwicklerwerkzeuge → Zustände
+2. **SOC unavailable**: 
+   - Make sure your vehicle integration is running and providing data
+   - Check entity status under Developer Tools → States
 
-3. **API-Fehler 401 (Unauthorized)**: 
-   - Überprüfe deinen API-Key (von Iternio erhalten?)
-   - Überprüfe deinen User Token (aus der ABRP App kopiert?)
+3. **API Error 401 (Unauthorized)**: 
+   - Verify your API Key (received from Iternio?)
+   - Verify your User Token (copied from ABRP app?)
 
-4. **API-Fehler 400 (Bad Request)**: 
-   - Prüfe das Car Model Format (z.B. `mercedes:eqa:22:67:other`)
-   - Stelle sicher, dass SOC einen gültigen Wert hat
+4. **API Error 400 (Bad Request)**: 
+   - Check Car Model format (e.g., `mercedes:eqa:22:67:other`)
+   - Make sure SOC has a valid value
 
-5. **Integration wird nicht gefunden**:
-   - Hast du Home Assistant nach der Installation neu gestartet?
-   - Liegt der Ordner korrekt unter `config/custom_components/abrp_telemetry/`?
+5. **Integration not found**:
+   - Did you restart Home Assistant after installation?
+   - Is the folder correctly placed under `config/custom_components/abrp_telemetry/`?
 
 ---
 
-## Entwickler-Debugging
+## Developer Debugging
 
-Diese Integration enthält eingebaute Debugging-Funktionen für Entwickler.
+This integration includes built-in debugging features for developers.
 
-### Methode 1: Erweiterte Logs (Einfachste Methode)
+### Method 1: Extended Logs (Easiest)
 
-Füge dies zu deiner `configuration.yaml` hinzu:
+Add this to your `configuration.yaml`:
 
 ```yaml
 logger:
@@ -326,48 +365,48 @@ logger:
     custom_components.abrp_telemetry: debug
 ```
 
-Logs findest du unter:
-- **Web UI**: Einstellungen → System → Protokolle
+Find logs at:
+- **Web UI**: Settings → System → Logs
 - **Docker**: `docker logs homeassistant -f`
 - **SSH**: `tail -f /config/home-assistant.log`
 
-### Methode 2: VS Code Remote Debugging
+### Method 2: VS Code Remote Debugging
 
-Für vollständiges Step-by-Step Debugging mit Breakpoints:
+For full step-by-step debugging with breakpoints:
 
-**1. debugpy auf Home Assistant installieren:**
+**1. Install debugpy on Home Assistant:**
 ```bash
-# In HA Terminal oder SSH:
+# In HA Terminal or SSH:
 pip install debugpy
 ```
 
-**2. Debug-Modus aktivieren:**
+**2. Enable debug mode:**
 
-Ändere in `custom_components/abrp_telemetry/const.py`:
+Change in `custom_components/abrp_telemetry/const.py`:
 ```python
-DEBUG_MODE = True  # Standardmäßig False
+DEBUG_MODE = True  # Default is False
 ```
 
-**3. Home Assistant neu starten**
+**3. Restart Home Assistant**
 
-**4. VS Code konfigurieren:**
+**4. Configure VS Code:**
 
-Das Projekt enthält bereits eine `.vscode/launch.json`. Öffne das Projekt in VS Code:
-- Drücke `Ctrl+Shift+D` (Run and Debug)
-- Wähle **"HA: Remote Attach"**
-- Passe den Host an (z.B. `homeassistant.local` oder IP-Adresse)
-- Drücke `F5`
+The project includes a `.vscode/launch.json`. Open the project in VS Code:
+- Press `Ctrl+Shift+D` (Run and Debug)
+- Select **"HA: Remote Attach"**
+- Adjust host as needed (e.g., `homeassistant.local` or IP address)
+- Press `F5`
 
-**5. Breakpoints setzen:**
+**5. Set breakpoints:**
 
-Klicke links neben die Zeilennummer in:
-- `telemetry.py` - Für Datenübertragung
-- `switch.py` - Für Ein/Aus-Schalter
-- `config_flow.py` - Für Einrichtungs-Wizard
+Click next to the line number in:
+- `telemetry.py` - For data transmission
+- `switch.py` - For on/off switch
+- `config_flow.py` - For setup wizard
 
-### Methode 3: Lokale Test-Installation
+### Method 3: Local Test Installation
 
-Für schnelles Testen ohne produktives HA:
+For quick testing without your production HA:
 
 ```powershell
 # Windows PowerShell
@@ -375,45 +414,45 @@ python -m venv ha_test
 .\ha_test\Scripts\Activate.ps1
 pip install homeassistant
 
-# Config-Ordner vorbereiten
+# Prepare config folder
 mkdir ha_config\custom_components
 Copy-Item -Recurse .\custom_components\abrp_telemetry ha_config\custom_components\
 
-# Home Assistant starten
+# Start Home Assistant
 hass -c .\ha_config --debug
 ```
 
-Öffne dann http://localhost:8123 im Browser.
+Then open http://localhost:8123 in your browser.
 
-### Debug-Status prüfen
+### Check Debug Status
 
-Der Switch `switch.abrp_telemetry_upload` zeigt als Attribute:
-- `is_paused` - Pausiert wegen Fehlern?
-- `consecutive_errors` - Fehler in Folge
-- `total_sends` - Erfolgreich gesendet
-- `total_errors` - Fehler gesamt
-- `last_successful_send` - Letzter erfolgreicher Upload (Unix Timestamp)
+The switch `switch.abrp_telemetry_upload` shows these attributes:
+- `is_paused` - Paused due to errors?
+- `consecutive_errors` - Errors in a row
+- `total_sends` - Successfully sent
+- `total_errors` - Total errors
+- `last_successful_send` - Last successful upload (Unix timestamp)
 
-Diese Werte kannst du unter **Entwicklerwerkzeuge → Zustände** sehen.
-
----
-
-## Deinstallation
-
-1. Gehe zu: **Einstellungen** → **Geräte & Dienste**
-2. Finde die ABRP Telemetry Integration
-3. Klicke auf das Drei-Punkte-Menü (⋮) → **Löschen**
-4. Optional: Lösche den Ordner `custom_components/abrp_telemetry`
+View these under **Developer Tools → States**.
 
 ---
 
-## Lizenz
+## Uninstallation
 
-MIT License - Frei zur Nutzung und Modifikation.
+1. Go to: **Settings** → **Devices & Services**
+2. Find the ABRP Telemetry Integration
+3. Click the three-dot menu (⋮) → **Delete**
+4. Optional: Delete the folder `custom_components/abrp_telemetry`
 
 ---
 
-## Support & Beitrag
+## License
 
-- **Probleme melden**: [GitHub Issues](https://github.com/Riffer/abrp_telemetry/issues)
-- **Verbesserungen**: Pull Requests sind willkommen!
+MIT License - Free to use and modify.
+
+---
+
+## Support & Contribution
+
+- **Report issues**: [GitHub Issues](https://github.com/Riffer/abrp_telemetry/issues)
+- **Improvements**: Pull requests welcome!

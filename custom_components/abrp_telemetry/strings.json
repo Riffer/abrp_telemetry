@@ -2,44 +2,66 @@
     "config": {
         "step": {
             "user": {
-                "title": "ABRP Telemetry Konfiguration",
-                "description": "Konfiguriere die Verbindung zu A Better Route Planner.\n\nDu benötigst einen API-Key (kontaktiere contact@iternio.com) und einen User Token aus der ABRP App.",
+                "title": "ABRP Telemetry Configuration",
+                "description": "Configure the connection to A Better Route Planner.\n\nYou need an API key (contact contact@iternio.com) and a user token from the ABRP app.\n\nFind your car model at: https://api.iternio.com/1/tlm/get_carmodels_list",
                 "data": {
                     "api_key": "ABRP API Key",
                     "user_token": "ABRP User Token",
-                    "car_model": "Fahrzeugmodell (z.B. mercedes:eqa:22:67:other)",
-                    "update_interval": "Update Interval (Sekunden)",
-                    "soc_entity": "Ladezustand (SOC) Entity",
-                    "speed_entity": "Geschwindigkeit Entity",
-                    "latitude_entity": "Breitengrad Entity",
-                    "longitude_entity": "Längengrad Entity",
-                    "power_entity": "Leistung (kW) Entity",
-                    "charging_entity": "Lädt gerade Entity",
-                    "ext_temp_entity": "Außentemperatur Entity",
-                    "batt_temp_entity": "Batterietemperatur Entity",
-                    "odometer_entity": "Kilometerstand Entity",
-                    "range_entity": "Reichweite Entity",
-                    "soh_entity": "Batteriegesundheit (SOH) Entity",
-                    "voltage_entity": "Spannung Entity",
-                    "current_entity": "Stromstärke Entity"
+                    "car_model": "Car Model (e.g., tesla:model3:19:75:lr)",
+                    "update_interval": "Update Interval (seconds)",
+                    "soc_entity": "State of Charge (SOC) Entity",
+                    "speed_entity": "Speed Entity",
+                    "latitude_entity": "Latitude Entity",
+                    "longitude_entity": "Longitude Entity",
+                    "power_entity": "Power (kW) Entity",
+                    "charging_entity": "Is Charging Entity",
+                    "ext_temp_entity": "Outside Temperature Entity",
+                    "batt_temp_entity": "Battery Temperature Entity",
+                    "odometer_entity": "Odometer Entity",
+                    "range_entity": "Range Entity",
+                    "soh_entity": "State of Health (SOH) Entity",
+                    "voltage_entity": "Voltage Entity",
+                    "current_entity": "Current Entity"
                 }
             }
         },
         "error": {
-            "api_key_required": "API Key ist erforderlich",
-            "user_token_required": "User Token ist erforderlich",
-            "soc_entity_required": "SOC Entity ist erforderlich"
+            "api_key_required": "API Key is required",
+            "user_token_required": "User Token is required",
+            "car_model_required": "Car Model is required (e.g., tesla:model3:19:75:lr)",
+            "soc_entity_required": "SOC Entity is required"
         },
         "abort": {
-            "already_configured": "Integration bereits konfiguriert"
+            "already_configured": "Integration already configured"
         }
     },
     "options": {
         "step": {
             "init": {
-                "title": "ABRP Telemetry Optionen",
+                "title": "ABRP Telemetry Options",
                 "data": {
-                    "update_interval": "Update Interval (Sekunden)"
+                    "update_interval": "Update Interval (seconds)"
+                }
+            }
+        }
+    },
+    "entity": {
+        "switch": {
+            "abrp_telemetry_upload": {
+                "name": "Upload enabled",
+                "state_attributes": {
+                    "is_paused": {
+                        "name": "Paused"
+                    },
+                    "consecutive_errors": {
+                        "name": "Consecutive errors"
+                    },
+                    "total_sends": {
+                        "name": "Total data sent"
+                    },
+                    "total_errors": {
+                        "name": "Total errors"
+                    }
                 }
             }
         }

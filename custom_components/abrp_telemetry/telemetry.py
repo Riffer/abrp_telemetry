@@ -1,4 +1,4 @@
-"""ABRP Telemetry Service - Sendet Fahrzeugdaten an ABRP."""
+"""ABRP Telemetry Service - Sends vehicle telemetry data to ABRP."""
 import logging
 import time
 import json
@@ -31,20 +31,19 @@ from .const import (
     CONF_VOLTAGE_ENTITY,
     CONF_CURRENT_ENTITY,
     DEFAULT_UPDATE_INTERVAL,
-    DEFAULT_CAR_MODEL,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-# Fehlerbehandlungs-Konstanten
-MAX_CONSECUTIVE_ERRORS = 10  # Nach X Fehlern pausieren
-ERROR_BACKOFF_MULTIPLIER = 2  # Exponentielles Backoff
-MAX_BACKOFF_SECONDS = 300  # Maximal 5 Minuten Pause
-INITIAL_BACKOFF_SECONDS = 10  # Start mit 10 Sekunden
+# Error handling constants
+MAX_CONSECUTIVE_ERRORS = 10  # Pause after X errors
+ERROR_BACKOFF_MULTIPLIER = 2  # Exponential backoff
+MAX_BACKOFF_SECONDS = 300  # Maximum 5 minutes pause
+INITIAL_BACKOFF_SECONDS = 10  # Start with 10 seconds
 
 
 class ABRPTelemetryService:
-    """Service zum Senden von Telemetriedaten an ABRP."""
+    """Service for sending telemetry data to ABRP."""
 
     def __init__(self, hass: HomeAssistant, config: dict[str, Any]):
         """Initialize the telemetry service."""
@@ -89,24 +88,24 @@ class ABRPTelemetryService:
 
     async def async_start(self):
         """Start the telemetry service."""
-        # Validiere Konfiguration vor dem Start
+        # Validate configuration before starting
         if not self._validate_configuration():
-            _LOGGER.error("ABRP Telemetry: Konfiguration unvollständig - Service wird nicht gestartet")
+            _LOGGER.error("ABRP Telemetry: Configuration incomplete - service not started")
             return False
         
-        _LOGGER.info(f"Starte ABRP Telemetry Service mit Interval von {self.update_interval} Sekunden")
+        _LOGGER.info(f"Starting ABRP Telemetry Service with interval of {self.update_interval} seconds")
         
-        # HTTP Session erstellen
+        # Create HTTP session
         self._session = aiohttp.ClientSession()
         
-        # Timer für regelmäßige Updates starten
+        # Start timer for regular updates
         self._unsub_timer = async_track_time_interval(
             self.hass,
             self._async_send_telemetry,
             timedelta(seconds=self.update_interval)
         )
         
-        # Sofort erste Telemetrie senden
+        # Send first telemetry immediately
         await self._async_send_telemetry()
         return True
     
@@ -122,36 +121,36 @@ class ABRPTelemetryService:
         self._consecutive_errors = 0
         self._is_paused = False
         self._current_backoff = INITIAL_BACKOFF_SECONDS
-        _LOGGER.info("ABRP Telemetry Upload wurde aktiviert")
+        _LOGGER.info("ABRP Telemetry upload enabled")
     
     def disable(self):
         """Disable telemetry upload."""
         self._is_enabled = False
-        _LOGGER.info("ABRP Telemetry Upload wurde deaktiviert")
+        _LOGGER.info("ABRP Telemetry upload disabled")
     
     def _validate_configuration(self) -> bool:
-        """Prüfe ob die Konfiguration vollständig ist."""
+        """Check if configuration is complete."""
         errors = []
         
         if not self.api_key:
-            errors.append("API Key fehlt")
+            errors.append("API Key missing")
         
         if not self.user_token:
-            errors.append("User Token fehlt")
+            errors.append("User Token missing")
         
         if not self.entity_map.get("soc"):
-            errors.append("SOC Entity nicht konfiguriert")
+            errors.append("SOC Entity not configured")
         
         if errors:
             for error in errors:
-                _LOGGER.error(f"ABRP Telemetry Konfigurationsfehler: {error}")
+                _LOGGER.error(f"ABRP Telemetry configuration error: {error}")
             return False
         
         return True
 
     async def async_stop(self):
         """Stop the telemetry service."""
-        _LOGGER.info("Stoppe ABRP Telemetry Service")
+        _LOGGER.info("Stopping ABRP Telemetry Service")
         
         if self._unsub_timer:
             self._unsub_timer()
@@ -273,31 +272,31 @@ class ABRPTelemetryService:
         return telemetry
 
     async def _async_send_telemetry(self, now=None):
-        """Sende Telemetriedaten an ABRP."""
-        # Prüfe ob Service vom Benutzer deaktiviert wurde
+        """Send telemetry data to ABRP."""
+        # Check if service is disabled by user
         if not self._is_enabled:
-            _LOGGER.debug("ABRP Telemetry ist deaktiviert (Schalter aus)")
+            _LOGGER.debug("ABRP Telemetry is disabled (switch off)")
             return
         
-        # Prüfe ob Service pausiert ist (nach zu vielen Fehlern)
+        # Check if service is paused (after too many errors)
         if self._is_paused:
-            _LOGGER.debug("ABRP Telemetry ist pausiert wegen vorheriger Fehler")
+            _LOGGER.debug("ABRP Telemetry is paused due to previous errors")
             return
         
         if not self._session:
-            _LOGGER.warning("HTTP Session nicht verfügbar")
+            _LOGGER.warning("HTTP session not available")
             return
         
         telemetry = self._build_telemetry_data()
         
-        # Mindestens SOC muss vorhanden sein
+        # At minimum, SOC must be present
         if "soc" not in telemetry:
-            _LOGGER.warning("SOC-Wert nicht verfügbar, überspringe Telemetrie-Übertragung")
-            self._handle_soft_error("SOC nicht verfügbar")
+            _LOGGER.warning("SOC value not available, skipping telemetry transmission")
+            self._handle_soft_error("SOC not available")
             return
         
         try:
-            # URL mit Parametern aufbauen
+            # Build URL with parameters
             params = {
                 "token": self.user_token,
                 "tlm": json.dumps(telemetry)
@@ -309,117 +308,117 @@ class ABRPTelemetryService:
             
             url = f"{ABRP_API_URL}?{urlencode(params)}"
             
-            _LOGGER.debug(f"Sende Telemetrie an ABRP: {telemetry}")
+            _LOGGER.debug(f"Sending telemetry to ABRP: {telemetry}")
             
             async with self._session.post(url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status == 200:
                     result = await response.json()
                     if result.get("status") == "ok":
-                        _LOGGER.debug("Telemetrie erfolgreich an ABRP gesendet")
+                        _LOGGER.debug("Telemetry successfully sent to ABRP")
                         self._handle_success()
                     else:
-                        _LOGGER.warning(f"ABRP Antwort: {result}")
-                        self._handle_api_error(f"ABRP Antwort nicht OK: {result}")
+                        _LOGGER.warning(f"ABRP response: {result}")
+                        self._handle_api_error(f"ABRP response not OK: {result}")
                 elif response.status == 401:
-                    _LOGGER.error("ABRP Authentifizierungsfehler (401): Prüfe API-Key und User Token")
-                    self._handle_critical_error("Authentifizierung fehlgeschlagen")
+                    _LOGGER.error("ABRP authentication error (401): Check API key and user token")
+                    self._handle_critical_error("Authentication failed")
                 elif response.status == 400:
                     error_text = await response.text()
                     _LOGGER.error(f"ABRP Bad Request (400): {error_text}")
-                    self._handle_api_error(f"Ungültige Anfrage: {error_text}")
+                    self._handle_api_error(f"Invalid request: {error_text}")
                 elif response.status == 429:
-                    _LOGGER.warning("ABRP Rate Limit erreicht (429) - pausiere vorübergehend")
+                    _LOGGER.warning("ABRP rate limit reached (429) - pausing temporarily")
                     self._handle_rate_limit()
                 else:
-                    _LOGGER.error(f"ABRP HTTP Fehler: {response.status}")
+                    _LOGGER.error(f"ABRP HTTP error: {response.status}")
                     self._handle_api_error(f"HTTP {response.status}")
                     
         except asyncio.TimeoutError:
-            _LOGGER.warning("Timeout beim Senden an ABRP - Server nicht erreichbar?")
+            _LOGGER.warning("Timeout sending to ABRP - server unreachable?")
             self._handle_network_error("Timeout")
         except aiohttp.ClientError as e:
-            _LOGGER.error(f"Netzwerkfehler beim Senden an ABRP: {e}")
+            _LOGGER.error(f"Network error sending to ABRP: {e}")
             self._handle_network_error(str(e))
         except Exception as e:
-            _LOGGER.error(f"Unerwarteter Fehler beim Senden der Telemetrie: {e}")
+            _LOGGER.error(f"Unexpected error sending telemetry: {e}")
             self._handle_api_error(str(e))
 
     def _handle_success(self):
-        """Behandle erfolgreiche Übertragung."""
+        """Handle successful transmission."""
         self._consecutive_errors = 0
         self._current_backoff = INITIAL_BACKOFF_SECONDS
         self._last_successful_send = time.time()
         self._total_sends += 1
         
-        # Falls pausiert war, wieder aktivieren
+        # If paused, re-enable
         if self._is_paused:
-            _LOGGER.info("ABRP Telemetry: Übertragung wiederhergestellt")
+            _LOGGER.info("ABRP Telemetry: Transmission restored")
             self._is_paused = False
 
     def _handle_soft_error(self, reason: str):
-        """Behandle weichen Fehler (z.B. fehlende Daten)."""
-        # Soft Errors erhöhen den Fehlerzähler nicht so stark
-        _LOGGER.debug(f"Soft Error: {reason}")
+        """Handle soft error (e.g., missing data)."""
+        # Soft errors don't increase error counter as much
+        _LOGGER.debug(f"Soft error: {reason}")
 
     def _handle_network_error(self, reason: str):
-        """Behandle Netzwerkfehler mit Backoff."""
+        """Handle network error with backoff."""
         self._consecutive_errors += 1
         self._total_errors += 1
         
         if self._consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
-            self._pause_with_backoff(f"Netzwerkfehler: {reason}")
+            self._pause_with_backoff(f"Network error: {reason}")
 
     def _handle_api_error(self, reason: str):
-        """Behandle API-Fehler."""
+        """Handle API error."""
         self._consecutive_errors += 1
         self._total_errors += 1
         
         if self._consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
-            self._pause_with_backoff(f"API-Fehler: {reason}")
+            self._pause_with_backoff(f"API error: {reason}")
 
     def _handle_critical_error(self, reason: str):
-        """Behandle kritische Fehler (z.B. Auth-Fehler) - sofort pausieren."""
-        _LOGGER.error(f"Kritischer Fehler: {reason} - Service wird pausiert")
+        """Handle critical error (e.g., auth error) - pause immediately."""
+        _LOGGER.error(f"Critical error: {reason} - service paused")
         self._is_paused = True
         self._total_errors += 1
-        # Bei Auth-Fehlern längere Pause
-        self._schedule_resume(600)  # 10 Minuten
+        # Longer pause for auth errors
+        self._schedule_resume(600)  # 10 minutes
 
     def _handle_rate_limit(self):
-        """Behandle Rate Limiting."""
-        self._pause_with_backoff("Rate Limit erreicht")
+        """Handle rate limiting."""
+        self._pause_with_backoff("Rate limit reached")
 
     def _pause_with_backoff(self, reason: str):
-        """Pausiere Service mit exponentiellem Backoff."""
+        """Pause service with exponential backoff."""
         self._is_paused = True
         
         _LOGGER.warning(
-            f"ABRP Telemetry pausiert für {self._current_backoff}s "
-            f"nach {self._consecutive_errors} aufeinanderfolgenden Fehlern. "
-            f"Grund: {reason}"
+            f"ABRP Telemetry paused for {self._current_backoff}s "
+            f"after {self._consecutive_errors} consecutive errors. "
+            f"Reason: {reason}"
         )
         
-        # Resume nach Backoff-Zeit planen
+        # Schedule resume after backoff time
         self._schedule_resume(self._current_backoff)
         
-        # Backoff erhöhen für nächstes Mal
+        # Increase backoff for next time
         self._current_backoff = min(
             self._current_backoff * ERROR_BACKOFF_MULTIPLIER,
             MAX_BACKOFF_SECONDS
         )
 
     def _schedule_resume(self, seconds: int):
-        """Plane Wiederaufnahme nach Pause."""
+        """Schedule resume after pause."""
         async def resume():
             await asyncio.sleep(seconds)
             if self._is_paused:
-                _LOGGER.info(f"ABRP Telemetry: Versuche Wiederaufnahme nach {seconds}s Pause")
+                _LOGGER.info(f"ABRP Telemetry: Attempting resume after {seconds}s pause")
                 self._is_paused = False
         
         asyncio.create_task(resume())
 
     def get_status(self) -> dict:
-        """Gibt den aktuellen Status des Services zurück."""
+        """Return current service status."""
         return {
             "is_enabled": self._is_enabled,
             "is_running": self._is_enabled and not self._is_paused and self._session is not None,

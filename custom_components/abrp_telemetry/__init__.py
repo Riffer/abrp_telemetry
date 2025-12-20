@@ -1,4 +1,4 @@
-"""ABRP (A Better Route Planner) Telemetry Integration für Home Assistant."""
+"""ABRP (A Better Route Planner) Telemetry Integration for Home Assistant."""
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -10,19 +10,19 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["switch"]
 
-# Debug-Modus initialisieren
+# Initialize debug mode
 if DEBUG_MODE:
-    _LOGGER.warning("ABRP Telemetry DEBUG MODE ist aktiviert!")
+    _LOGGER.warning("ABRP Telemetry DEBUG MODE is enabled!")
     try:
         import debugpy
         debugpy.listen(("0.0.0.0", DEBUG_REMOTE_PORT))
-        _LOGGER.info(f"debugpy wartet auf Verbindung auf Port {DEBUG_REMOTE_PORT}")
-        # Uncomment um auf Debugger zu warten:
+        _LOGGER.info(f"debugpy waiting for connection on port {DEBUG_REMOTE_PORT}")
+        # Uncomment to wait for debugger:
         # debugpy.wait_for_client()
     except ImportError:
-        _LOGGER.warning("debugpy nicht installiert - Remote Debugging nicht verfügbar")
+        _LOGGER.warning("debugpy not installed - remote debugging not available")
     except Exception as e:
-        _LOGGER.warning(f"debugpy konnte nicht gestartet werden: {e}")
+        _LOGGER.warning(f"debugpy could not be started: {e}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -30,14 +30,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = entry.data
     
-    # Starte den Telemetry Service
+    # Start telemetry service
     from .telemetry import ABRPTelemetryService
     
     service = ABRPTelemetryService(hass, entry.data)
     started = await service.async_start()
     
     if not started:
-        _LOGGER.error("ABRP Telemetry Service konnte nicht gestartet werden - Konfiguration prüfen")
+        _LOGGER.error("ABRP Telemetry Service could not be started - check configuration")
         return False
     
     hass.data[DOMAIN][entry.entry_id] = {
@@ -45,16 +45,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "config": entry.data
     }
     
-    # Plattformen laden (Switch)
+    # Load platforms (Switch)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
-    _LOGGER.info("ABRP Telemetry Integration erfolgreich gestartet")
+    _LOGGER.info("ABRP Telemetry Integration started successfully")
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    # Plattformen entladen
+    # Unload platforms
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     
     if entry.entry_id in hass.data[DOMAIN]:
