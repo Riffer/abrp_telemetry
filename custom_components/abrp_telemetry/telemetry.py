@@ -161,7 +161,7 @@ class ABRPTelemetryService:
             self._session = None
 
     def _get_entity_value(self, entity_id: Optional[str], default=None) -> Any:
-        """Hole den aktuellen Wert einer Entity."""
+        """Get current value of an entity."""
         if not entity_id:
             return default
         
@@ -170,15 +170,79 @@ class ABRPTelemetryService:
             return default
         
         try:
-            # Versuche numerischen Wert zu parsen
+            # Try to parse numeric value
             value = float(state.state)
             return value
         except (ValueError, TypeError):
-            # Für Boolean/String Werte
+            # For boolean/string values
             return state.state
 
+    def _get_position(self) -> tuple[Optional[float], Optional[float]]:
+        """Get latitude and longitude from configured entities.
+        
+        Supports:
+        - Separate lat/lon sensor entities
+        - device_tracker entities (lat/lon as attributes)
+        - Any entity with latitude/longitude attributes
+        """
+        lat = None
+        lon = None
+        
+        lat_entity = self.entity_map.get("lat")
+        lon_entity = self.entity_map.get("lon")
+        
+        # Case 1: Same entity for both (device_tracker)
+        if lat_entity and lat_entity == lon_entity:
+            state = self.hass.states.get(lat_entity)
+            if state and state.attributes:
+                lat = state.attributes.get("latitude")
+                lon = state.attributes.get("longitude")
+                if lat is not None and lon is not None:
+                    return (float(lat), float(lon))
+        
+        # Case 2: Only lat entity provided - check if it's a device_tracker with both values
+        if lat_entity and not lon_entity:
+            state = self.hass.states.get(lat_entity)
+            if state and state.attributes:
+                lat = state.attributes.get("latitude")
+                lon = state.attributes.get("longitude")
+                if lat is not None and lon is not None:
+                    return (float(lat), float(lon))
+        
+        # Case 3: Separate entities for lat and lon
+        if lat_entity:
+            state = self.hass.states.get(lat_entity)
+            if state:
+                # First check attributes (for device_tracker)
+                if "latitude" in (state.attributes or {}):
+                    lat = state.attributes.get("latitude")
+                # Then try state value (for sensor)
+                elif state.state not in ("unknown", "unavailable", None):
+                    try:
+                        lat = float(state.state)
+                    except (ValueError, TypeError):
+                        pass
+        
+        if lon_entity:
+            state = self.hass.states.get(lon_entity)
+            if state:
+                # First check attributes (for device_tracker)
+                if "longitude" in (state.attributes or {}):
+                    lon = state.attributes.get("longitude")
+                # Then try state value (for sensor)
+                elif state.state not in ("unknown", "unavailable", None):
+                    try:
+                        lon = float(state.state)
+                    except (ValueError, TypeError):
+                        pass
+        
+        if lat is not None and lon is not None:
+            return (float(lat), float(lon))
+        
+        return (None, None)
+
     def _get_charging_state(self, entity_id: Optional[str]) -> Optional[int]:
-        """Ermittle den Ladezustand (0 oder 1)."""
+        """Determine charging state (0 or 1)."""
         if not entity_id:
             return None
         
@@ -186,7 +250,7 @@ class ABRPTelemetryService:
         if state is None or state.state in ("unknown", "unavailable", None):
             return None
         
-        # Verschiedene Formate unterstützen
+        # Support various formats
         state_value = state.state.lower()
         
         if state_value in ("on", "true", "1", "charging", "yes"):
@@ -194,77 +258,76 @@ class ABRPTelemetryService:
         elif state_value in ("off", "false", "0", "not_charging", "no", "idle"):
             return 0
         
-        # Versuche numerisch
+        # Try numeric
         try:
             return 1 if float(state.state) > 0 else 0
         except (ValueError, TypeError):
             return None
 
     def _build_telemetry_data(self) -> dict:
-        """Erstelle das Telemetrie-Datenobjekt für ABRP."""
+        """Build the telemetry data object for ABRP."""
         telemetry = {
             "utc": int(time.time()),
             "car_model": self.car_model,
         }
         
-        # SOC (State of Charge) - Pflichtfeld
+        # SOC (State of Charge) - Required field
         soc = self._get_entity_value(self.entity_map["soc"])
         if soc is not None:
             telemetry["soc"] = soc
         
-        # Geschwindigkeit
+        # Speed
         speed = self._get_entity_value(self.entity_map["speed"])
         if speed is not None:
             telemetry["speed"] = speed
         
-        # Position
-        lat = self._get_entity_value(self.entity_map["lat"])
-        lon = self._get_entity_value(self.entity_map["lon"])
+        # Position - supports both separate lat/lon sensors and device_tracker entities
+        lat, lon = self._get_position()
         if lat is not None and lon is not None:
             telemetry["lat"] = lat
             telemetry["lon"] = lon
         
-        # Leistung (kW)
+        # Power (kW)
         power = self._get_entity_value(self.entity_map["power"])
         if power is not None:
             telemetry["power"] = power
         
-        # Ladezustand
+        # Charging state
         is_charging = self._get_charging_state(self.entity_map["is_charging"])
         if is_charging is not None:
             telemetry["is_charging"] = is_charging
         
-        # Außentemperatur
+        # Outside temperature
         ext_temp = self._get_entity_value(self.entity_map["ext_temp"])
         if ext_temp is not None:
             telemetry["ext_temp"] = ext_temp
         
-        # Batterietemperatur
+        # Battery temperature
         batt_temp = self._get_entity_value(self.entity_map["batt_temp"])
         if batt_temp is not None:
             telemetry["batt_temp"] = batt_temp
         
-        # Kilometerstand
+        # Odometer
         odometer = self._get_entity_value(self.entity_map["odometer"])
         if odometer is not None:
             telemetry["odometer"] = odometer
         
-        # Geschätzte Reichweite
+        # Estimated range
         est_range = self._get_entity_value(self.entity_map["est_battery_range"])
         if est_range is not None:
             telemetry["est_battery_range"] = est_range
         
-        # State of Health (Batteriegesundheit)
+        # State of Health (Battery health)
         soh = self._get_entity_value(self.entity_map["soh"])
         if soh is not None:
             telemetry["soh"] = soh
         
-        # Spannung
+        # Voltage
         voltage = self._get_entity_value(self.entity_map["voltage"])
         if voltage is not None:
             telemetry["voltage"] = voltage
         
-        # Stromstärke
+        # Current
         current = self._get_entity_value(self.entity_map["current"])
         if current is not None:
             telemetry["current"] = current

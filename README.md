@@ -185,6 +185,8 @@ ABRP needs the exact vehicle model for accurate consumption calculations.
 | Odometer | `sensor.my_mercedes_odometer` |
 | Range | `sensor.my_mercedes_range` |
 
+> **Note on Position:** Many vehicle integrations provide a `device_tracker` entity that stores latitude and longitude as **attributes**, not as the state value. This integration automatically detects this and extracts the coordinates from the attributes. Simply select the same `device_tracker` entity for both **Latitude** and **Longitude** fields, or just the **Latitude** field – the integration will find both coordinates automatically.
+
 ### PSA (Peugeot/Citroën/Opel)
 
 | Parameter | Example Entity |
