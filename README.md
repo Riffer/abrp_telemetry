@@ -4,10 +4,21 @@ Diese Custom Integration sendet Telemetriedaten deines Elektrofahrzeugs an [A Be
 
 ## Features
 
-- Automatische Übertragung von Fahrzeugdaten an ABRP
-- Konfigurierbares Update-Intervall (Standard: 5 Sekunden)
-- Unterstützt alle wichtigen Telemetrie-Parameter
-- Optimiert für Mercedes EQA 250 mit mb2020 Integration
+- ✅ Automatische Übertragung von Fahrzeugdaten an ABRP
+- ✅ Konfigurierbares Update-Intervall (Standard: 5 Sekunden)
+- ✅ **Ein/Aus-Schalter** für manuelle Kontrolle und Automationen
+- ✅ **Robuste Fehlerbehandlung** mit automatischer Pause bei Problemen
+- ✅ Unterstützt alle wichtigen Telemetrie-Parameter
+- ✅ Optimiert für Mercedes EQA 250 mit mb2020 Integration
+
+## Schnellübersicht
+
+| Was | Wo |
+|-----|-----|
+| **Switch Entity** | `switch.abrp_telemetry_upload` |
+| **Logs** | Einstellungen → System → Protokolle |
+| **Status-Attribute** | Entwicklerwerkzeuge → Zustände → switch.abrp_telemetry_upload |
+| **Konfiguration** | Einstellungen → Geräte & Dienste → ABRP Telemetry |
 
 ## Funktionsweise
 
@@ -19,6 +30,18 @@ Die Integration arbeitet vollautomatisch:
 4. **ABRP verarbeitet** die Daten und zeigt sie in der App/Website an
 
 **Es ist kein manueller Start erforderlich!** Sobald die Integration eingerichtet ist, läuft der Daten-Upload automatisch.
+
+### Fehlerbehandlung
+
+Die Integration ist robust gegen Fehler:
+
+| Situation | Verhalten |
+|-----------|-----------|
+| Netzwerkfehler | Wartet und versucht es erneut |
+| 10 Fehler in Folge | Pausiert automatisch (10s → 20s → 40s → max 5min) |
+| Auth-Fehler (401) | Pausiert für 10 Minuten |
+| SOC nicht verfügbar | Überspringt Zyklus, warnt im Log |
+| Service manuell deaktiviert | Sendet nichts bis wieder aktiviert |
 
 ---
 
@@ -171,6 +194,85 @@ ABRP empfiehlt einen Datenpunkt alle **5 Sekunden** für beste Ergebnisse. Wenig
 
 Für die individuelle Verbrauchskalibrierung benötigt ABRP mindestens `speed`, `power` und `is_charging` alle 10 Sekunden.
 
+---
+
+## Ein/Aus-Schalter
+
+Nach der Einrichtung wird automatisch ein Switch erstellt:
+
+**Entity:** `switch.abrp_telemetry_upload`
+
+| Zustand | Bedeutung |
+|---------|-----------|
+| **ON** | Upload aktiv - Daten werden alle X Sekunden gesendet |
+| **OFF** | Upload pausiert - Keine Daten werden gesendet |
+
+### Verwendung in Automationen
+
+**Beispiel 1: Upload nur während der Fahrt**
+```yaml
+automation:
+  - alias: "ABRP nur bei Fahrt"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.mercedes_eqa_speed
+        above: 0
+    action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.abrp_telemetry_upload
+
+  - alias: "ABRP aus wenn geparkt"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.mercedes_eqa_speed
+        below: 1
+        for:
+          minutes: 5
+    action:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.abrp_telemetry_upload
+```
+
+**Beispiel 2: Upload beim Laden aktivieren**
+```yaml
+automation:
+  - alias: "ABRP beim Laden"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.mercedes_eqa_charging
+        to: "on"
+    action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.abrp_telemetry_upload
+```
+
+**Beispiel 3: Nachts deaktivieren**
+```yaml
+automation:
+  - alias: "ABRP nachts aus"
+    trigger:
+      - platform: time
+        at: "23:00:00"
+    action:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.abrp_telemetry_upload
+
+  - alias: "ABRP morgens an"
+    trigger:
+      - platform: time
+        at: "06:00:00"
+    action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.abrp_telemetry_upload
+```
+
+---
+
 ## Troubleshooting
 
 ### Logging aktivieren
@@ -206,6 +308,93 @@ logger:
 5. **Integration wird nicht gefunden**:
    - Hast du Home Assistant nach der Installation neu gestartet?
    - Liegt der Ordner korrekt unter `config/custom_components/abrp_telemetry/`?
+
+---
+
+## Entwickler-Debugging
+
+Diese Integration enthält eingebaute Debugging-Funktionen für Entwickler.
+
+### Methode 1: Erweiterte Logs (Einfachste Methode)
+
+Füge dies zu deiner `configuration.yaml` hinzu:
+
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.abrp_telemetry: debug
+```
+
+Logs findest du unter:
+- **Web UI**: Einstellungen → System → Protokolle
+- **Docker**: `docker logs homeassistant -f`
+- **SSH**: `tail -f /config/home-assistant.log`
+
+### Methode 2: VS Code Remote Debugging
+
+Für vollständiges Step-by-Step Debugging mit Breakpoints:
+
+**1. debugpy auf Home Assistant installieren:**
+```bash
+# In HA Terminal oder SSH:
+pip install debugpy
+```
+
+**2. Debug-Modus aktivieren:**
+
+Ändere in `custom_components/abrp_telemetry/const.py`:
+```python
+DEBUG_MODE = True  # Standardmäßig False
+```
+
+**3. Home Assistant neu starten**
+
+**4. VS Code konfigurieren:**
+
+Das Projekt enthält bereits eine `.vscode/launch.json`. Öffne das Projekt in VS Code:
+- Drücke `Ctrl+Shift+D` (Run and Debug)
+- Wähle **"HA: Remote Attach"**
+- Passe den Host an (z.B. `homeassistant.local` oder IP-Adresse)
+- Drücke `F5`
+
+**5. Breakpoints setzen:**
+
+Klicke links neben die Zeilennummer in:
+- `telemetry.py` - Für Datenübertragung
+- `switch.py` - Für Ein/Aus-Schalter
+- `config_flow.py` - Für Einrichtungs-Wizard
+
+### Methode 3: Lokale Test-Installation
+
+Für schnelles Testen ohne produktives HA:
+
+```powershell
+# Windows PowerShell
+python -m venv ha_test
+.\ha_test\Scripts\Activate.ps1
+pip install homeassistant
+
+# Config-Ordner vorbereiten
+mkdir ha_config\custom_components
+Copy-Item -Recurse .\custom_components\abrp_telemetry ha_config\custom_components\
+
+# Home Assistant starten
+hass -c .\ha_config --debug
+```
+
+Öffne dann http://localhost:8123 im Browser.
+
+### Debug-Status prüfen
+
+Der Switch `switch.abrp_telemetry_upload` zeigt als Attribute:
+- `is_paused` - Pausiert wegen Fehlern?
+- `consecutive_errors` - Fehler in Folge
+- `total_sends` - Erfolgreich gesendet
+- `total_errors` - Fehler gesamt
+- `last_successful_send` - Letzter erfolgreicher Upload (Unix Timestamp)
+
+Diese Werte kannst du unter **Entwicklerwerkzeuge → Zustände** sehen.
 
 ---
 
