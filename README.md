@@ -452,6 +452,18 @@ MIT License - Free to use and modify.
 
 ---
 
+## Development & AI Assistance
+
+This integration was developed with the assistance of **GitHub Copilot** (powered by Claude AI). The entire codebase, including the architecture, error handling, configuration flow, and documentation, was created through an interactive conversation between the developer and the AI assistant.
+
+This transparent approach to AI-assisted development demonstrates how modern AI tools can help accelerate software development while maintaining code quality and best practices. The developer provided the requirements, domain knowledge, and iterative feedback, while the AI assisted with implementation, code generation, and documentation.
+
+**Tools used:**
+- VS Code with GitHub Copilot
+- Claude AI (Anthropic)
+
+---
+
 ## Support & Contribution
 
 - **Report issues**: [GitHub Issues](https://github.com/Riffer/abrp_telemetry/issues)
