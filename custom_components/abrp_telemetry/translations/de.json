@@ -10,9 +10,16 @@
                     "update_interval": "Update Interval (Sekunden)"
                 }
             },
+            "manufacturer": {
+                "title": "ABRP Telemetry - Hersteller",
+                "description": "Wähle deinen Fahrzeughersteller.",
+                "data": {
+                    "manufacturer": "Hersteller"
+                }
+            },
             "car_model": {
-                "title": "ABRP Telemetry - Fahrzeugauswahl",
-                "description": "Wähle dein Fahrzeug aus der Liste oder gib die Model-ID manuell ein.\n\nManuelle Suche: {car_models_url}",
+                "title": "ABRP Telemetry - Fahrzeugmodell",
+                "description": "Wähle dein {manufacturer} Modell oder gib die Model-ID manuell ein.\n\nManuelle Suche: {car_models_url}",
                 "data": {
                     "car_model": "Fahrzeugmodell"
                 }
@@ -45,6 +52,7 @@
         "error": {
             "api_key_required": "API Key ist erforderlich",
             "user_token_required": "User Token ist erforderlich",
+            "manufacturer_required": "Hersteller ist erforderlich",
             "car_model_required": "Fahrzeugmodell ist erforderlich",
             "soc_entity_required": "SOC Entity ist erforderlich"
         },

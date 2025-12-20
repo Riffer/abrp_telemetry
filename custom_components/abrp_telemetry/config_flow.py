@@ -45,6 +45,7 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize the config flow."""
         self._data = {}
         self._car_models = {}  # {display_name: car_model_id}
+        self._manufacturers = {}  # {manufacturer: {model_display: model_id}}
 
     async def _fetch_car_models(self) -> dict[str, str]:
         """Fetch car models from ABRP API."""
@@ -65,6 +66,31 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.warning("Failed to fetch car models from ABRP API: %s", e)
         return {}
 
+    def _parse_manufacturers(self, car_models: dict[str, str]) -> dict[str, dict[str, str]]:
+        """Parse car models into manufacturer -> models structure.
+        
+        Input format: {"Mercedes-Benz;EQA;250 (alpha)": "mercedes:eqa:21:67"}
+        Output: {"Mercedes-Benz": {"EQA 250 (alpha)": "mercedes:eqa:21:67"}}
+        """
+        manufacturers = {}
+        
+        for display_name, model_id in car_models.items():
+            parts = display_name.split(";")
+            if len(parts) >= 2:
+                manufacturer = parts[0].strip()
+                # Combine remaining parts as model name
+                model_name = " ".join(parts[1:]).strip()
+            else:
+                # Fallback for entries without semicolon
+                manufacturer = "Other"
+                model_name = display_name
+            
+            if manufacturer not in manufacturers:
+                manufacturers[manufacturer] = {}
+            manufacturers[manufacturer][model_name] = model_id
+        
+        return manufacturers
+
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Step 1: API credentials and update interval."""
         errors = {}
@@ -79,7 +105,8 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._data.update(user_input)
                 # Fetch car models for next step
                 self._car_models = await self._fetch_car_models()
-                return await self.async_step_car_model()
+                self._manufacturers = self._parse_manufacturers(self._car_models)
+                return await self.async_step_manufacturer()
 
         data_schema = vol.Schema({
             vol.Required(CONF_API_KEY): str,
@@ -95,27 +122,71 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_car_model(self, user_input: dict[str, Any] | None = None):
-        """Step 2: Select car model."""
+    async def async_step_manufacturer(self, user_input: dict[str, Any] | None = None):
+        """Step 2: Select manufacturer."""
         errors = {}
+
+        if user_input is not None:
+            selected = user_input.get("manufacturer")
+            if not selected:
+                errors["manufacturer"] = "manufacturer_required"
+            else:
+                self._data["_selected_manufacturer"] = selected
+                return await self.async_step_car_model()
+
+        # Build manufacturer selector (sorted alphabetically)
+        if self._manufacturers:
+            sorted_manufacturers = sorted(self._manufacturers.keys())
+            data_schema = vol.Schema({
+                vol.Required("manufacturer"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=sorted_manufacturers,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                        sort=False,  # Already sorted
+                    )
+                ),
+            })
+        else:
+            # Fallback to text input if API failed
+            data_schema = vol.Schema({
+                vol.Required("manufacturer"): str,
+            })
+
+        return self.async_show_form(
+            step_id="manufacturer",
+            data_schema=data_schema,
+            errors=errors,
+        )
+
+    async def async_step_car_model(self, user_input: dict[str, Any] | None = None):
+        """Step 3: Select car model."""
+        errors = {}
+        selected_manufacturer = self._data.get("_selected_manufacturer", "")
 
         if user_input is not None:
             selected = user_input.get(CONF_CAR_MODEL)
             if not selected:
                 errors[CONF_CAR_MODEL] = "car_model_required"
             else:
-                # Store the car model ID (not the display name)
-                if selected in self._car_models:
-                    self._data[CONF_CAR_MODEL] = self._car_models[selected]
+                # Get the model ID from manufacturer's models
+                if selected_manufacturer in self._manufacturers:
+                    models = self._manufacturers[selected_manufacturer]
+                    if selected in models:
+                        self._data[CONF_CAR_MODEL] = models[selected]
+                    else:
+                        # Manual input - use as-is
+                        self._data[CONF_CAR_MODEL] = selected
                 else:
-                    # Manual input - use as-is
                     self._data[CONF_CAR_MODEL] = selected
+                
+                # Clean up temporary data
+                self._data.pop("_selected_manufacturer", None)
                 return await self.async_step_entities_basic()
 
-        # Build car model selector
-        if self._car_models:
-            # Create sorted list of display names
-            sorted_models = sorted(self._car_models.keys())
+        # Build model selector for selected manufacturer (sorted alphabetically)
+        if selected_manufacturer in self._manufacturers:
+            models = self._manufacturers[selected_manufacturer]
+            sorted_models = sorted(models.keys())
             data_schema = vol.Schema({
                 vol.Required(CONF_CAR_MODEL): selector.SelectSelector(
                     selector.SelectSelectorConfig(
@@ -127,7 +198,7 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
             })
         else:
-            # Fallback to text input if API failed
+            # Fallback to text input
             data_schema = vol.Schema({
                 vol.Required(CONF_CAR_MODEL): str,
             })
@@ -137,6 +208,7 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=data_schema,
             errors=errors,
             description_placeholders={
+                "manufacturer": selected_manufacturer,
                 "car_models_url": "https://api.iternio.com/1/tlm/get_carmodels_list"
             }
         )
