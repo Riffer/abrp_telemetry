@@ -18,16 +18,18 @@ This custom integration sends telemetry data from your electric vehicle to [A Be
 
 This integration works with any Home Assistant integration that provides EV telemetry data, including:
 
-| Integration | Vehicles | Notes |
-|-------------|----------|-------|
-| **Mercedes me 2020 (mb2020)** | All Mercedes EQ models | EQA, EQB, EQC, EQE, EQS, etc. |
-| **PSA Car Controller** | Peugeot, Citroën, Opel, DS | e-208, e-2008, Corsa-e, etc. |
-| **Hyundai/Kia Connect** | Hyundai, Kia, Genesis | Ioniq 5/6, EV6, GV60, etc. |
-| **Tesla Custom Integration** | All Tesla models | Model 3, Y, S, X |
-| **BMW Connected Drive** | BMW iX, i4, i7, etc. | |
-| **Volkswagen We Connect** | VW ID.3, ID.4, ID.5, etc. | |
-| **Renault** | Zoe, Megane E-Tech, etc. | |
-| **Any other** | Any EV | As long as SOC sensor is available |
+| Integration | Vehicles | Repository | Type |
+|-------------|----------|------------|------|
+| **[Mercedes me 2020 (mbapi2020)](https://github.com/ReneNulschDE/mbapi2020)** | All Mercedes EQ models (EQA, EQB, EQC, EQE, EQS, etc.) | HACS Custom | Very comprehensive |
+| **[PSA Car Controller](https://github.com/flobz/psa_car_controller)** | Peugeot, Citroën, Opel, DS | Standalone + [HA Addon](https://github.com/flobz/psacc-ha) | Charging control |
+| **[Hyundai/Kia Connect](https://github.com/Hyundai-Kia-Connect/kia_uvo)** | Hyundai, Kia, Genesis (Ioniq 5/6, EV6, GV60, etc.) | HACS Custom | Very active |
+| **[Tesla Custom](https://github.com/alandtse/tesla)** | All Tesla models (Model 3, Y, S, X) | HACS Custom | Requires Fleet API |
+| **[BMW Connected Drive](https://www.home-assistant.io/integrations/bmw_connected_drive/)** | BMW iX, i4, i7, MINI | HA Core | Built-in |
+| **[Volkswagen Carnet](https://github.com/robinostlund/homeassistant-volkswagencarnet)** | VW ID.3, ID.4, ID.5, etc. | HACS Custom | Active alternative |
+| **[Renault](https://www.home-assistant.io/integrations/renault/)** | Zoe, Megane E-Tech, etc. | HA Core | Built-in |
+| **Any other** | Any EV | — | As long as SOC sensor is available |
+
+> **Note:** The integrations above are independent projects. Please refer to their respective documentation for setup and support.
 
 ## Quick Reference
 
