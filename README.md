@@ -5,9 +5,12 @@ This custom integration sends telemetry data from your electric vehicle to [A Be
 ## Features
 
 - ✅ Automatic transmission of vehicle data to ABRP
+- ✅ **Easy setup wizard** with manufacturer/model selection (no manual ID lookup needed!)
 - ✅ Configurable update interval (default: 5 seconds)
 - ✅ **On/Off switch** for manual control and automations
 - ✅ **Robust error handling** with automatic pause on failures
+- ✅ **Options flow** to modify sensor mappings after setup
+- ✅ **Live value display** in configuration dialog
 - ✅ Supports all important telemetry parameters
 - ✅ Works with **any Home Assistant vehicle integration** that provides the required sensor data
 
@@ -119,23 +122,6 @@ You need a **free Telemetry API Key** from Iternio:
 5. Tap: **Show Token**
 6. Copy the displayed token (long alphanumeric string)
 
-### 3. Find Your Car Model ID
-
-ABRP needs the exact vehicle model for accurate consumption calculations.
-
-**Find your model at:** [ABRP Car Models List](https://api.iternio.com/1/tlm/get_carmodels_list)
-
-**Common examples:**
-
-| Vehicle | Car Model ID |
-|---------|--------------|
-| Mercedes EQA 250 | `mercedes:eqa:22:67:other` |
-| Mercedes EQS 450+ | `mercedes:eqs:22:108:other` |
-| Peugeot e-208 | `peugeot:e208:20:50:other` |
-| Hyundai Ioniq 5 LR AWD | `hyundai:ioniq5:21:77:awd` |
-| Tesla Model 3 LR | `tesla:model3:19:75:lr` |
-| VW ID.4 Pro | `volkswagen:id4:21:77:pro` |
-
 ---
 
 ## Setup in Home Assistant
@@ -145,22 +131,51 @@ ABRP needs the exact vehicle model for accurate consumption calculations.
 1. Go to: **Settings** → **Devices & Services**
 2. Click: **+ Add Integration** (bottom right)
 3. Search for: **"ABRP Telemetry"**
-4. Fill out the form:
+4. **Step 1 - Credentials:**
 
    | Field | Description |
    |-------|-------------|
    | **API Key** | Your Iternio API Key (from contact@iternio.com) |
    | **User Token** | Your ABRP User Token (from the app) |
-   | **Car Model** | Your vehicle model ID (e.g., `mercedes:eqa:22:67:other`) |
    | **Update Interval** | Seconds between uploads (5-60, default: 5) |
+
+5. **Step 2 - Manufacturer:** Select your vehicle manufacturer from the dropdown list (alphabetically sorted)
+
+6. **Step 3 - Model:** Select your exact vehicle model from the filtered list
+
+7. **Step 4 - Basic Sensors:**
+
+   | Field | Description |
+   |-------|-------------|
    | **SOC Entity** | **REQUIRED:** Sensor for state of charge (%) |
    | **Speed Entity** | Optional: Sensor for speed (km/h) |
-   | **Latitude/Longitude** | Optional: GPS position |
+   | **Position Entity** | Optional: device_tracker with GPS coordinates |
    | **Power Entity** | Optional: Instantaneous power (kW) |
    | **Charging Entity** | Optional: Charging status (on/off) |
-   | ... | Additional optional sensors |
+   | **Range Entity** | Optional: Estimated range (km) |
+   | **Odometer Entity** | Optional: Odometer (km) |
 
-5. Click **"Submit"**
+8. **Step 5 - Advanced Sensors (optional):**
+
+   | Field | Description |
+   |-------|-------------|
+   | **SOH Entity** | State of Health (%) |
+   | **Voltage Entity** | Battery voltage (V) |
+   | **Current Entity** | Battery current (A) |
+   | **Battery Temp Entity** | Battery temperature (°C) |
+   | **Ext Temp Entity** | Outside temperature (°C) |
+
+9. Click **"Submit"**
+
+### Changing Configuration Later
+
+You can modify all sensor mappings after initial setup:
+
+1. Go to: **Settings** → **Devices & Services** → **ABRP Telemetry**
+2. Click: **Configure** (gear icon)
+3. The current values of all assigned entities are displayed
+4. Modify any sensor assignment as needed
+5. Click **"Submit"** to save
 
 ### What Happens After Setup?
 
