@@ -3,11 +3,16 @@
         "step": {
             "user": {
                 "title": "ABRP Telemetry - Credentials",
-                "description": "Configure the connection to A Better Route Planner.\n\nYou need an API key (contact contact@iternio.com) and a user token from the ABRP app.",
+                "description": "Configure the connection to A Better Route Planner.\n\nYou need an API key (contact contact@iternio.com) and a user token from the ABRP app.\n\n📖 [API Documentation](https://documenter.getpostman.com/view/7396339/SWTK5a8w)",
                 "data": {
                     "api_key": "ABRP API Key",
                     "user_token": "ABRP User Token",
                     "update_interval": "Update Interval (seconds)"
+                },
+                "data_description": {
+                    "api_key": "Obtain from Iternio (contact@iternio.com)",
+                    "user_token": "From ABRP app: Settings → Car → Generic → Show Token",
+                    "update_interval": "Recommended: 5 seconds. ABRP uses this for accurate predictions."
                 }
             },
             "manufacturer": {
@@ -26,26 +31,54 @@
             },
             "entities_basic": {
                 "title": "ABRP Telemetry - Basic Sensors",
-                "description": "Map your vehicle sensors to ABRP data fields.\n\nSOC is required, all others are optional but recommended.",
+                "description": "Map your vehicle sensors to ABRP data fields.\n\n**High Priority:** SOC is required. Position, Speed, Power and Charging are highly recommended for accurate route planning.",
                 "data": {
                     "soc_entity": "State of Charge (SOC) - Required",
                     "speed_entity": "Speed",
                     "position_entity": "Position (device_tracker)",
-                    "power_entity": "Power (kW)",
+                    "power_entity": "Power",
                     "charging_entity": "Charging Status",
                     "range_entity": "Estimated Range",
                     "odometer_entity": "Odometer"
+                },
+                "data_description": {
+                    "soc_entity": "Battery level in % (as shown on dashboard). This is the primary value for route planning.",
+                    "speed_entity": "Vehicle speed in km/h. Used for consumption calculations.",
+                    "position_entity": "GPS location. Required for route tracking and charging station proximity.",
+                    "power_entity": "Current power in kW. Positive = output (driving), Negative = input (charging).",
+                    "charging_entity": "Whether the vehicle is currently charging (on/off or binary sensor).",
+                    "range_entity": "Vehicle's estimated remaining range in km.",
+                    "odometer_entity": "Current odometer reading in km."
                 }
             },
             "entities_advanced": {
                 "title": "ABRP Telemetry - Advanced Sensors",
                 "description": "Additional sensors for more accurate predictions.\n\nThese are optional - skip if not available.",
                 "data": {
-                    "soh_entity": "State of Health (SOH)",
+                    "soh_entity": "State of Health (SOH) Sensor",
                     "voltage_entity": "Battery Voltage",
                     "current_entity": "Battery Current",
                     "batt_temp_entity": "Battery Temperature",
                     "ext_temp_entity": "Outside Temperature"
+                },
+                "data_description": {
+                    "soh_entity": "Battery health in %. 100% = no degradation. Only if your vehicle reports this.",
+                    "voltage_entity": "Battery pack voltage in V.",
+                    "current_entity": "Battery current in A. Positive = output, Negative = charging.",
+                    "batt_temp_entity": "Battery temperature in °C. Important for charging speed predictions.",
+                    "ext_temp_entity": "Outside temperature in °C. Affects range and HVAC consumption."
+                }
+            },
+            "fixed_values": {
+                "title": "ABRP Telemetry - Fixed Values",
+                "description": "Enter fixed values for parameters that your vehicle doesn't report via sensors.\n\n⚠️ **These values are constants** - only use if your vehicle doesn't provide a sensor for these.\n\nLeave at 0 to skip.",
+                "data": {
+                    "soh_fixed": "Fixed State of Health (SOH)",
+                    "capacity_fixed": "Fixed Usable Battery Capacity"
+                },
+                "data_description": {
+                    "soh_fixed": "Battery health in % (100 = no degradation). Measure with ABRP calibration drives or OBD tools. Set to 0 to use sensor instead.",
+                    "capacity_fixed": "Usable battery capacity in kWh. Usually slightly less than advertised (e.g., 62 kWh usable from 66.5 kWh total). Set to 0 to skip."
                 }
             }
         },
@@ -70,21 +103,50 @@
                     "soc_entity": "State of Charge (SOC) - Required",
                     "speed_entity": "Speed",
                     "position_entity": "Position (device_tracker)",
-                    "power_entity": "Power (kW)",
+                    "power_entity": "Power",
                     "charging_entity": "Charging Status",
                     "range_entity": "Estimated Range",
                     "odometer_entity": "Odometer"
+                },
+                "data_description": {
+                    "update_interval": "Recommended: 5 seconds",
+                    "soc_entity": "Battery level in % (dashboard display)",
+                    "speed_entity": "Speed in km/h",
+                    "position_entity": "GPS location (device_tracker)",
+                    "power_entity": "Power in kW (+output/-charging)",
+                    "charging_entity": "Charging on/off",
+                    "range_entity": "Estimated range in km",
+                    "odometer_entity": "Odometer in km"
                 }
             },
             "options_advanced": {
                 "title": "ABRP Telemetry - Advanced Sensors",
                 "description": "Additional sensors for more accurate predictions.\n\n**Current values:**\n{current_values}",
                 "data": {
-                    "soh_entity": "State of Health (SOH)",
+                    "soh_entity": "State of Health (SOH) Sensor",
                     "voltage_entity": "Battery Voltage",
                     "current_entity": "Battery Current",
                     "batt_temp_entity": "Battery Temperature",
                     "ext_temp_entity": "Outside Temperature"
+                },
+                "data_description": {
+                    "soh_entity": "Battery health in % (100 = no degradation)",
+                    "voltage_entity": "Pack voltage in V",
+                    "current_entity": "Current in A (+output/-charging)",
+                    "batt_temp_entity": "Battery temp in °C",
+                    "ext_temp_entity": "Outside temp in °C"
+                }
+            },
+            "options_fixed": {
+                "title": "ABRP Telemetry - Fixed Values",
+                "description": "Fixed values for parameters without sensors.\n\n⚠️ Only use if no sensor is available. Set to 0 to disable.\n\n**Current values:**\n{current_values}",
+                "data": {
+                    "soh_fixed": "Fixed State of Health (SOH)",
+                    "capacity_fixed": "Fixed Usable Battery Capacity"
+                },
+                "data_description": {
+                    "soh_fixed": "Battery health in % (100 = no degradation). Set to 0 to use sensor instead.",
+                    "capacity_fixed": "Usable battery capacity in kWh. Set to 0 to skip."
                 }
             }
         },

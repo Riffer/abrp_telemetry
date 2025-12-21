@@ -33,6 +33,10 @@ CONF_SOH_ENTITY = "soh_entity"
 CONF_VOLTAGE_ENTITY = "voltage_entity"
 CONF_CURRENT_ENTITY = "current_entity"
 
+# Fixed Values (manually entered by user, not from entities)
+CONF_SOH_FIXED = "soh_fixed"  # State of Health (%)
+CONF_CAPACITY_FIXED = "capacity_fixed"  # Usable battery capacity (kWh)
+
 # Default Values
 DEFAULT_UPDATE_INTERVAL = 5  # Seconds - ABRP recommends 5 seconds
 DEFAULT_CAR_MODEL = ""  # User must specify their car model from ABRP

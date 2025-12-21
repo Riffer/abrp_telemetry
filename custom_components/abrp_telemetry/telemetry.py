@@ -32,6 +32,8 @@ from .const import (
     CONF_SOH_ENTITY,
     CONF_VOLTAGE_ENTITY,
     CONF_CURRENT_ENTITY,
+    CONF_SOH_FIXED,
+    CONF_CAPACITY_FIXED,
     DEFAULT_UPDATE_INTERVAL,
 )
 
@@ -87,6 +89,12 @@ class ABRPTelemetryService:
             "soh": config.get(CONF_SOH_ENTITY),
             "voltage": config.get(CONF_VOLTAGE_ENTITY),
             "current": config.get(CONF_CURRENT_ENTITY),
+        }
+        
+        # Fixed values (manually entered by user)
+        self.fixed_values = {
+            "soh": config.get(CONF_SOH_FIXED, 0),  # State of Health in %
+            "capacity": config.get(CONF_CAPACITY_FIXED, 0),  # Usable battery capacity in kWh
         }
 
     async def async_start(self):
@@ -338,10 +346,17 @@ class ABRPTelemetryService:
         if est_range is not None:
             telemetry["est_battery_range"] = est_range
         
-        # State of Health (Battery health)
+        # State of Health (Battery health) - prefer sensor, fallback to fixed value
         soh = self._get_entity_value(self.entity_map["soh"])
         if soh is not None:
             telemetry["soh"] = soh
+        elif self.fixed_values.get("soh", 0) > 0:
+            telemetry["soh"] = self.fixed_values["soh"]
+        
+        # Usable Battery Capacity (fixed value only - usually not from sensor)
+        capacity = self.fixed_values.get("capacity", 0)
+        if capacity and capacity > 0:
+            telemetry["capacity"] = capacity
         
         # Voltage
         voltage = self._get_entity_value(self.entity_map["voltage"])

@@ -28,6 +28,8 @@ from .const import (
     CONF_SOH_ENTITY,
     CONF_VOLTAGE_ENTITY,
     CONF_CURRENT_ENTITY,
+    CONF_SOH_FIXED,
+    CONF_CAPACITY_FIXED,
     DEFAULT_UPDATE_INTERVAL,
 )
 
@@ -267,21 +269,8 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Step 4: Advanced entity mappings (optional)."""
         if user_input is not None:
             self._data.update(user_input)
-            # Create entry with all collected data
-            car_model = self._data.get(CONF_CAR_MODEL, "EV")
-            # Find display name for title if possible
-            display_name = car_model
-            for name, model_id in self._car_models.items():
-                if model_id == car_model:
-                    # Shorten the display name for the title
-                    parts = name.split(";")
-                    display_name = f"{parts[0]} {parts[1]}" if len(parts) > 1 else parts[0]
-                    break
-            
-            return self.async_create_entry(
-                title=f"ABRP ({display_name})",
-                data=self._data
-            )
+            # Continue to fixed values step
+            return await self.async_step_fixed_values()
 
         data_schema = vol.Schema({
             vol.Optional(CONF_SOH_ENTITY): selector.EntitySelector(
@@ -303,6 +292,57 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="entities_advanced",
+            data_schema=data_schema,
+        )
+
+    async def async_step_fixed_values(self, user_input: dict[str, Any] | None = None):
+        """Step 5: Fixed values for parameters without sensors."""
+        if user_input is not None:
+            # Only store non-zero values
+            if user_input.get(CONF_SOH_FIXED, 0) > 0:
+                self._data[CONF_SOH_FIXED] = user_input[CONF_SOH_FIXED]
+            if user_input.get(CONF_CAPACITY_FIXED, 0) > 0:
+                self._data[CONF_CAPACITY_FIXED] = user_input[CONF_CAPACITY_FIXED]
+            
+            # Create entry with all collected data
+            car_model = self._data.get(CONF_CAR_MODEL, "EV")
+            # Find display name for title if possible
+            display_name = car_model
+            for name, model_id in self._car_models.items():
+                if model_id == car_model:
+                    # Shorten the display name for the title
+                    parts = name.split(";")
+                    display_name = f"{parts[0]} {parts[1]}" if len(parts) > 1 else parts[0]
+                    break
+            
+            return self.async_create_entry(
+                title=f"ABRP ({display_name})",
+                data=self._data
+            )
+
+        data_schema = vol.Schema({
+            vol.Optional(CONF_SOH_FIXED, default=0): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=100,
+                    step=1,
+                    unit_of_measurement="%",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(CONF_CAPACITY_FIXED, default=0): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=200,
+                    step=0.1,
+                    unit_of_measurement="kWh",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+        })
+
+        return self.async_show_form(
+            step_id="fixed_values",
             data_schema=data_schema,
         )
 
@@ -441,12 +481,8 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
         """Step 2: Advanced entity mappings."""
         if user_input is not None:
             self._data.update(user_input)
-            # Update the config entry with new data
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                data=self._data
-            )
-            return self.async_create_entry(title="", data={})
+            # Continue to fixed values step
+            return await self.async_step_options_fixed()
 
         # Get current values from config
         current = self.config_entry.data
@@ -495,6 +531,73 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="options_advanced",
+            data_schema=data_schema,
+            description_placeholders={"current_values": current_values},
+        )
+
+    async def async_step_options_fixed(self, user_input=None):
+        """Step 3: Fixed values for parameters without sensors."""
+        if user_input is not None:
+            # Only store non-zero values, remove zero values
+            if user_input.get(CONF_SOH_FIXED, 0) > 0:
+                self._data[CONF_SOH_FIXED] = user_input[CONF_SOH_FIXED]
+            else:
+                self._data.pop(CONF_SOH_FIXED, None)
+            
+            if user_input.get(CONF_CAPACITY_FIXED, 0) > 0:
+                self._data[CONF_CAPACITY_FIXED] = user_input[CONF_CAPACITY_FIXED]
+            else:
+                self._data.pop(CONF_CAPACITY_FIXED, None)
+            
+            # Update the config entry with new data
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=self._data
+            )
+            return self.async_create_entry(title="", data={})
+
+        # Get current values from config
+        current = self.config_entry.data
+        
+        # Build current values display
+        lines = []
+        soh_val = current.get(CONF_SOH_FIXED, 0)
+        if soh_val and soh_val > 0:
+            lines.append(f"• SOH (fixed): **{soh_val}%**")
+        cap_val = current.get(CONF_CAPACITY_FIXED, 0)
+        if cap_val and cap_val > 0:
+            lines.append(f"• Capacity (fixed): **{cap_val} kWh**")
+        current_values = "\n".join(lines) if lines else "No fixed values configured"
+
+        data_schema = vol.Schema({
+            vol.Optional(
+                CONF_SOH_FIXED,
+                default=current.get(CONF_SOH_FIXED, 0)
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=100,
+                    step=1,
+                    unit_of_measurement="%",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_CAPACITY_FIXED,
+                default=current.get(CONF_CAPACITY_FIXED, 0)
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=200,
+                    step=0.1,
+                    unit_of_measurement="kWh",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+        })
+
+        return self.async_show_form(
+            step_id="options_fixed",
             data_schema=data_schema,
             description_placeholders={"current_values": current_values},
         )
