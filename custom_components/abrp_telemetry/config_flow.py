@@ -413,7 +413,8 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
             ("Odometer", CONF_ODOMETER_ENTITY),
         ])
 
-        data_schema = vol.Schema({
+        # Build schema dynamically - only set default for entities that have values
+        schema_dict = {
             vol.Required(
                 CONF_UPDATE_INTERVAL,
                 default=current.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
@@ -432,47 +433,32 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="sensor")
             ),
-            vol.Optional(
-                CONF_SPEED_ENTITY,
-                default=current.get(CONF_SPEED_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_POSITION_ENTITY,
-                default=current.get(CONF_POSITION_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain=["device_tracker", "sensor"])
-            ),
-            vol.Optional(
-                CONF_POWER_ENTITY,
-                default=current.get(CONF_POWER_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_CHARGING_ENTITY,
-                default=current.get(CONF_CHARGING_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain=["sensor", "binary_sensor"])
-            ),
-            vol.Optional(
-                CONF_RANGE_ENTITY,
-                default=current.get(CONF_RANGE_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_ODOMETER_ENTITY,
-                default=current.get(CONF_ODOMETER_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-        })
+        }
+        
+        # Optional entities - only set default if value exists (empty string causes validation error)
+        optional_entities = [
+            (CONF_SPEED_ENTITY, "sensor"),
+            (CONF_POSITION_ENTITY, ["device_tracker", "sensor"]),
+            (CONF_POWER_ENTITY, "sensor"),
+            (CONF_CHARGING_ENTITY, ["sensor", "binary_sensor"]),
+            (CONF_RANGE_ENTITY, "sensor"),
+            (CONF_ODOMETER_ENTITY, "sensor"),
+        ]
+        
+        for key, domain in optional_entities:
+            entity_id = current.get(key)
+            if entity_id:
+                schema_dict[vol.Optional(key, default=entity_id)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=domain)
+                )
+            else:
+                schema_dict[vol.Optional(key)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=domain)
+                )
 
         return self.async_show_form(
             step_id="init",
-            data_schema=data_schema,
+            data_schema=vol.Schema(schema_dict),
             errors=errors,
             description_placeholders={"current_values": current_values},
         )
@@ -496,42 +482,30 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
             ("Ext Temp", CONF_EXT_TEMP_ENTITY),
         ])
 
-        data_schema = vol.Schema({
-            vol.Optional(
-                CONF_SOH_ENTITY,
-                default=current.get(CONF_SOH_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_VOLTAGE_ENTITY,
-                default=current.get(CONF_VOLTAGE_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_CURRENT_ENTITY,
-                default=current.get(CONF_CURRENT_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_BATT_TEMP_ENTITY,
-                default=current.get(CONF_BATT_TEMP_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-            vol.Optional(
-                CONF_EXT_TEMP_ENTITY,
-                default=current.get(CONF_EXT_TEMP_ENTITY, "")
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="sensor")
-            ),
-        })
+        # Build schema dynamically - only set default for entities that have values
+        schema_dict = {}
+        optional_entities = [
+            (CONF_SOH_ENTITY, "sensor"),
+            (CONF_VOLTAGE_ENTITY, "sensor"),
+            (CONF_CURRENT_ENTITY, "sensor"),
+            (CONF_BATT_TEMP_ENTITY, "sensor"),
+            (CONF_EXT_TEMP_ENTITY, "sensor"),
+        ]
+        
+        for key, domain in optional_entities:
+            entity_id = current.get(key)
+            if entity_id:
+                schema_dict[vol.Optional(key, default=entity_id)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=domain)
+                )
+            else:
+                schema_dict[vol.Optional(key)] = selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain=domain)
+                )
 
         return self.async_show_form(
             step_id="options_advanced",
-            data_schema=data_schema,
+            data_schema=vol.Schema(schema_dict),
             description_placeholders={"current_values": current_values},
         )
 
