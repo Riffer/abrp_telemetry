@@ -14,6 +14,49 @@ This custom integration sends telemetry data from your electric vehicle to [A Be
 - ✅ Supports all important telemetry parameters
 - ✅ Works with **any Home Assistant vehicle integration** that provides the required sensor data
 
+---
+
+## Why This Integration?
+
+### The Problem
+
+Many EV owners want to send live telemetry to ABRP for better route planning, but existing solutions are often:
+
+- **Complex**: Require manual CURL commands, REST API calls, or YAML configurations
+- **Fragile**: No error handling, no retry logic, no user feedback
+- **Technical**: Need to manually look up car model IDs and construct API payloads
+- **Limited**: Often hardcoded for specific vehicles or integrations
+
+### Our Solution
+
+This integration provides a **user-friendly, robust, and universal** approach:
+
+| Feature | CURL/REST Solutions | This Integration |
+|---------|---------------------|------------------|
+| Setup | Manual YAML/scripts | GUI wizard |
+| Car Model Selection | Manual ID lookup | Dropdown with 500+ models |
+| Error Handling | None or basic | Automatic retry with backoff |
+| Configuration Changes | Edit YAML, restart | Options flow, auto-reload |
+| Monitoring | Check logs manually | Entity attributes, live payload |
+| Vehicle Support | Usually single brand | Any HA vehicle integration |
+| HACS Support | Usually not | ✅ One-click install |
+
+### Vehicle API Limitations
+
+Some vehicle integrations have API call limits that may affect telemetry frequency:
+
+| Integration | Known Limitations | Recommendation |
+|-------------|-------------------|----------------|
+| **VW/Audi/Skoda** | ~480 calls/day (varies) | Use 30-60s interval |
+| **BMW** | Rate limits apply | Use 15-30s interval |
+| **Tesla** | Fleet API quotas | Check Tesla integration docs |
+| **Mercedes** | Generally generous | 5-15s interval works well |
+| **Hyundai/Kia** | Varies by region | Test and adjust |
+
+> **Note:** These limitations are imposed by the car manufacturers, not by this integration. Adjust your update interval accordingly.
+
+---
+
 ## Supported Vehicle Integrations
 
 This integration works with any Home Assistant integration that provides EV telemetry data, including:
@@ -497,5 +540,51 @@ This transparent approach to AI-assisted development demonstrates how modern AI 
 
 ## Support & Contribution
 
-- **Report issues**: [GitHub Issues](https://github.com/Riffer/abrp_telemetry/issues)
-- **Improvements**: Pull requests welcome!
+### Reporting Issues
+
+- **Bug reports**: [GitHub Issues](https://github.com/Riffer/abrp_telemetry/issues)
+- **Feature requests**: Also via GitHub Issues
+
+### Contributing
+
+We especially welcome feedback from users with different vehicle integrations!
+
+**We'd love to hear from you if:**
+
+- You use a **vehicle integration not listed** above
+- Your integration has **API rate limits** we should document
+- You have **entity naming patterns** that could help other users
+- You found **workarounds** for specific vehicle limitations
+- You want to **improve translations** (currently: English, German)
+
+**How to contribute:**
+
+1. **Open an Issue** describing your vehicle setup and experience
+2. **Submit a Pull Request** for code improvements
+3. **Share your configuration** in Discussions to help others
+
+### Community Discussion
+
+Found this integration useful? Have questions about your specific setup?
+
+- **Home Assistant Community**: Share your experience in the [HA Forum](https://community.home-assistant.io/)
+- **ABRP Forum**: Discuss at [forum.iternio.com](https://forum.iternio.com/)
+- **Reddit**: r/homeassistant, r/electricvehicles
+
+### Vehicle-Specific Help Wanted
+
+We're looking for users with these vehicles to help improve documentation:
+
+| Vehicle | Status | Help Needed |
+|---------|--------|-------------|
+| Tesla (all models) | 🟡 Untested | Entity names, Fleet API setup |
+| VW ID.3/ID.4/ID.5 | 🟡 Untested | Confirm rate limits, entity names |
+| BMW iX/i4/i7 | 🟡 Untested | Rate limits, entity names |
+| Hyundai Ioniq 5/6 | 🟡 Untested | Entity names, regional differences |
+| Kia EV6/EV9 | 🟡 Untested | Entity names, regional differences |
+| Polestar 2/3 | 🟡 Untested | Integration availability |
+| Rivian R1T/R1S | 🟡 Untested | Integration availability |
+| Ford Mustang Mach-E | 🟡 Untested | Integration availability |
+| Nissan Leaf/Ariya | 🟡 Untested | Entity names |
+
+✅ = Tested and documented | 🟡 = Untested, feedback welcome
