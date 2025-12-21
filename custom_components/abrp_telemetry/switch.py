@@ -1,5 +1,6 @@
 """Switch platform for ABRP Telemetry - Enable/Disable Upload."""
 import logging
+from datetime import datetime
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
@@ -64,12 +65,24 @@ class ABRPTelemetrySwitch(SwitchEntity):
             return {}
         
         status = self._service.get_status()
+        
+        # Convert Unix timestamp to readable datetime
+        last_send = status.get("last_successful_send")
+        if last_send:
+            try:
+                last_send_dt = datetime.fromtimestamp(last_send)
+                last_send_formatted = last_send_dt.isoformat()
+            except (ValueError, TypeError, OSError):
+                last_send_formatted = None
+        else:
+            last_send_formatted = None
+        
         return {
             "is_paused": status.get("is_paused", False),
             "consecutive_errors": status.get("consecutive_errors", 0),
             "total_sends": status.get("total_sends", 0),
             "total_errors": status.get("total_errors", 0),
-            "last_successful_send": status.get("last_successful_send"),
+            "last_successful_send": last_send_formatted,
         }
 
     async def async_turn_on(self, **kwargs) -> None:
