@@ -2,6 +2,8 @@
 
 This custom integration sends telemetry data from your electric vehicle to [A Better Route Planner (ABRP)](https://abetterrouteplanner.com/).
 
+**Tested with Mercedes (mbapi2020)**, should work with any Home Assistant vehicle integration that provides the required sensor data.
+
 ## Features
 
 - ✅ Automatic transmission of vehicle data to ABRP
@@ -12,7 +14,7 @@ This custom integration sends telemetry data from your electric vehicle to [A Be
 - ✅ **Options flow** to modify sensor mappings after setup
 - ✅ **Live value display** in configuration dialog
 - ✅ Supports all important telemetry parameters
-- ✅ Works with **any Home Assistant vehicle integration** that provides the required sensor data
+- ✅ Designed to work with **any Home Assistant vehicle integration** that provides SOC data
 
 ---
 
@@ -59,20 +61,20 @@ Some vehicle integrations have API call limits that may affect telemetry frequen
 
 ## Supported Vehicle Integrations
 
-This integration works with any Home Assistant integration that provides EV telemetry data, including:
+This integration is designed to work with any Home Assistant integration that provides EV telemetry data. Currently **tested with Mercedes (mbapi2020)**, but should be compatible with:
 
-| Integration | Vehicles | Repository | Type |
-|-------------|----------|------------|------|
-| **[Mercedes me 2020 (mbapi2020)](https://github.com/ReneNulschDE/mbapi2020)** | All Mercedes EQ models (EQA, EQB, EQC, EQE, EQS, etc.) | HACS Custom | Very comprehensive |
-| **[PSA Car Controller](https://github.com/flobz/psa_car_controller)** | Peugeot, Citroën, Opel, DS | Standalone + [HA Addon](https://github.com/flobz/psacc-ha) | Charging control |
-| **[Hyundai/Kia Connect](https://github.com/Hyundai-Kia-Connect/kia_uvo)** | Hyundai, Kia, Genesis (Ioniq 5/6, EV6, GV60, etc.) | HACS Custom | Very active |
-| **[Tesla Custom](https://github.com/alandtse/tesla)** | All Tesla models (Model 3, Y, S, X) | HACS Custom | Requires Fleet API |
-| **[BMW Connected Drive](https://www.home-assistant.io/integrations/bmw_connected_drive/)** | BMW iX, i4, i7, MINI | HA Core | Built-in |
-| **[Volkswagen Carnet](https://github.com/robinostlund/homeassistant-volkswagencarnet)** | VW ID.3, ID.4, ID.5, etc. | HACS Custom | Active alternative |
-| **[Renault](https://www.home-assistant.io/integrations/renault/)** | Zoe, Megane E-Tech, etc. | HA Core | Built-in |
-| **Any other** | Any EV | — | As long as SOC sensor is available |
+| Integration | Vehicles | Repository | Status |
+|-------------|----------|------------|--------|
+| **[Mercedes me 2020 (mbapi2020)](https://github.com/ReneNulschDE/mbapi2020)** | All Mercedes EQ models (EQA, EQB, EQC, EQE, EQS, etc.) | HACS Custom | ✅ Tested |
+| **[PSA Car Controller](https://github.com/flobz/psa_car_controller)** | Peugeot, Citroën, Opel, DS | Standalone + [HA Addon](https://github.com/flobz/psacc-ha) | 🟡 Untested |
+| **[Hyundai/Kia Connect](https://github.com/Hyundai-Kia-Connect/kia_uvo)** | Hyundai, Kia, Genesis (Ioniq 5/6, EV6, GV60, etc.) | HACS Custom | 🟡 Untested |
+| **[Tesla Custom](https://github.com/alandtse/tesla)** | All Tesla models (Model 3, Y, S, X) | HACS Custom | 🟡 Untested |
+| **[BMW Connected Drive](https://www.home-assistant.io/integrations/bmw_connected_drive/)** | BMW iX, i4, i7, MINI | HA Core | 🟡 Untested |
+| **[Volkswagen Carnet](https://github.com/robinostlund/homeassistant-volkswagencarnet)** | VW ID.3, ID.4, ID.5, etc. | HACS Custom | 🟡 Untested |
+| **[Renault](https://www.home-assistant.io/integrations/renault/)** | Zoe, Megane E-Tech, etc. | HA Core | 🟡 Untested |
+| **Any other** | Any EV | — | 🟡 If SOC sensor available |
 
-> **Note:** The integrations above are independent projects. Please refer to their respective documentation for setup and support.
+> **Help wanted!** If you successfully use this integration with a vehicle other than Mercedes, please [open an issue](https://github.com/Riffer/abrp_telemetry/issues) to let us know so we can update the status.
 
 ## Quick Reference
 
