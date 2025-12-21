@@ -1,5 +1,6 @@
 """Switch platform for ABRP Telemetry - Enable/Disable Upload."""
 import logging
+import json
 from datetime import datetime
 
 from homeassistant.components.switch import SwitchEntity
@@ -77,12 +78,22 @@ class ABRPTelemetrySwitch(SwitchEntity):
         else:
             last_send_formatted = None
         
+        # Format last payload as JSON string for display
+        last_payload = status.get("last_payload")
+        if last_payload:
+            # Remove sensitive/redundant fields for display
+            display_payload = {k: v for k, v in last_payload.items() if k != "car_model"}
+            payload_json = json.dumps(display_payload, indent=2)
+        else:
+            payload_json = None
+        
         return {
             "is_paused": status.get("is_paused", False),
             "consecutive_errors": status.get("consecutive_errors", 0),
             "total_sends": status.get("total_sends", 0),
             "total_errors": status.get("total_errors", 0),
             "last_successful_send": last_send_formatted,
+            "last_payload": payload_json,
         }
 
     async def async_turn_on(self, **kwargs) -> None:

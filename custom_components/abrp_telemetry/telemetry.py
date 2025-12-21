@@ -66,6 +66,7 @@ class ABRPTelemetryService:
         self._last_successful_send = None
         self._total_sends = 0
         self._total_errors = 0
+        self._last_payload = None  # Last telemetry data sent to ABRP
         
         # Konfiguration auslesen
         self.api_key = config.get(CONF_API_KEY)
@@ -388,6 +389,9 @@ class ABRPTelemetryService:
         
         telemetry = self._build_telemetry_data()
         
+        # Store the payload for status display (even if not sent)
+        self._last_payload = telemetry
+        
         # At minimum, SOC must be present
         if "soc" not in telemetry:
             _LOGGER.warning("SOC value not available, skipping telemetry transmission")
@@ -533,4 +537,5 @@ class ABRPTelemetryService:
             "total_errors": self._total_errors,
             "last_successful_send": self._last_successful_send,
             "current_backoff_seconds": self._current_backoff,
+            "last_payload": self._last_payload,
         }

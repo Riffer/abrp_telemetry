@@ -170,6 +170,9 @@
                     },
                     "total_errors": {
                         "name": "Total errors"
+                    },
+                    "last_payload": {
+                        "name": "Last sent data"
                     }
                 }
             }
