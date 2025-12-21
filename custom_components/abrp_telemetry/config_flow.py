@@ -111,8 +111,14 @@ class ABRPTelemetryConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         data_schema = vol.Schema({
             vol.Required(CONF_API_KEY): str,
             vol.Required(CONF_USER_TOKEN): str,
-            vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): vol.All(
-                vol.Coerce(int), vol.Range(min=5, max=60)
+            vol.Required(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5,
+                    max=60,
+                    step=1,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.SLIDER,
+                )
             ),
         })
 
@@ -368,10 +374,18 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
         ])
 
         data_schema = vol.Schema({
-            vol.Optional(
+            vol.Required(
                 CONF_UPDATE_INTERVAL,
                 default=current.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
-            ): vol.All(vol.Coerce(int), vol.Range(min=5, max=60)),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5,
+                    max=60,
+                    step=1,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.SLIDER,
+                )
+            ),
             vol.Required(
                 CONF_SOC_ENTITY,
                 default=current.get(CONF_SOC_ENTITY, "")
