@@ -153,13 +153,10 @@ The integration is robust against failures:
 
 ### 1. Get ABRP API Key
 
-You need a **free Telemetry API Key** from Iternio:
+You need a **Telemetry API Key** from ABRP:
 
-1. Visit the official API page: **[https://www.iternio.com/api](https://www.iternio.com/api)**
-2. Send an email to: **contact@iternio.com**
-3. Subject: "ABRP Telemetry API Key Request"
-4. Content: Briefly describe that you want to use the Home Assistant integration
-5. You'll typically receive the API key within 1-2 business days
+1. Open: **[https://abetterrouteplanner.com/home/app/api-keys/telemetry](https://abetterrouteplanner.com/home/app/api-keys/telemetry)**
+2. Create/copy your Telemetry API key from that page
 
 ### 2. Get User Token from ABRP
 
@@ -183,7 +180,7 @@ You need a **free Telemetry API Key** from Iternio:
 
    | Field | Description |
    |-------|-------------|
-   | **API Key** | Your Iternio API Key (from contact@iternio.com) |
+  | **API Key** | Your ABRP Telemetry API Key |
    | **User Token** | Your ABRP User Token (from the app) |
    | **Update Interval** | Seconds between uploads (5-60, default: 5) |
 
@@ -534,7 +531,7 @@ This transparent approach to AI-assisted development demonstrates how modern AI 
 | Resource | URL |
 |----------|-----|
 | **ABRP Website** | [abetterrouteplanner.com](https://abetterrouteplanner.com/) |
-| **Iternio API Info** | [iternio.com/api](https://www.iternio.com/api) |
+| **API Documentation** | [https://abetterrouteplanner.com/resources/api](https://abetterrouteplanner.com/resources/api) |
 | **Telemetry API Documentation** | [Postman Documentation](https://documenter.getpostman.com/view/7396339/SWTK5a8w) |
 | **Car Models List** | [api.iternio.com/1/tlm/get_carmodels_list](https://api.iternio.com/1/tlm/get_carmodels_list) |
 
