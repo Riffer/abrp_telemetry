@@ -2,7 +2,7 @@
 
 This custom integration sends telemetry data from your electric vehicle to [A Better Route Planner (ABRP)](https://abetterrouteplanner.com/).
 
-**Tested with Mercedes (mbapi2020)**, should work with any Home Assistant vehicle integration that provides the required sensor data.
+**Tested with Mercedes (mbapi2020) and Volvo (community confirmed)**, should work with any Home Assistant vehicle integration that provides the required sensor data.
 
 ## Features
 
@@ -61,11 +61,12 @@ Some vehicle integrations have API call limits that may affect telemetry frequen
 
 ## Supported Vehicle Integrations
 
-This integration is designed to work with any Home Assistant integration that provides EV telemetry data. Currently **tested with Mercedes (mbapi2020)**, but should be compatible with:
+This integration is designed to work with any Home Assistant integration that provides EV telemetry data. Currently **tested with Mercedes (mbapi2020) and Volvo (community confirmed)**, but should be compatible with:
 
 | Integration | Vehicles | Repository | Status |
 |-------------|----------|------------|--------|
 | **[Mercedes me 2020 (mbapi2020)](https://github.com/ReneNulschDE/mbapi2020)** | All Mercedes EQ models (EQA, EQB, EQC, EQE, EQS, etc.) | HACS Custom | ✅ Tested |
+| **Volvo (Home Assistant integration)** | Volvo EV/PHEV models | HA Core | ✅ Tested (community confirmed) |
 | **[PSA Car Controller](https://github.com/flobz/psa_car_controller)** | Peugeot, Citroën, Opel, DS | Standalone + [HA Addon](https://github.com/flobz/psacc-ha) | 🟡 Untested |
 | **[Hyundai/Kia Connect](https://github.com/Hyundai-Kia-Connect/kia_uvo)** | Hyundai, Kia, Genesis (Ioniq 5/6, EV6, GV60, etc.) | HACS Custom | 🟡 Untested |
 | **[Tesla Custom](https://github.com/alandtse/tesla)** | All Tesla models (Model 3, Y, S, X) | HACS Custom | 🟡 Untested |
@@ -74,7 +75,7 @@ This integration is designed to work with any Home Assistant integration that pr
 | **[Renault](https://www.home-assistant.io/integrations/renault/)** | Zoe, Megane E-Tech, etc. | HA Core | 🟡 Untested |
 | **Any other** | Any EV | — | 🟡 If SOC sensor available |
 
-> **Help wanted!** If you successfully use this integration with a vehicle other than Mercedes, please [open an issue](https://github.com/Riffer/abrp_telemetry/issues) to let us know so we can update the status.
+> **Help wanted!** If you successfully use this integration with a vehicle not yet marked as tested, please [open an issue](https://github.com/Riffer/abrp_telemetry/issues) to let us know so we can update the status.
 
 ## Quick Reference
 
@@ -586,4 +587,4 @@ We're looking for users with these vehicles to help improve documentation:
 | Ford Mustang Mach-E | 🟡 Untested | Integration availability |
 | Nissan Leaf/Ariya | 🟡 Untested | Entity names |
 
-✅ = Tested and documented | 🟡 = Untested, feedback welcome
+✅ = Tested (maintainer or community confirmed) | 🟡 = Untested, feedback welcome
