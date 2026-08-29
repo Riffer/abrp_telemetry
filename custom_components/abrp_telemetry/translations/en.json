@@ -96,6 +96,18 @@
     "options": {
         "step": {
             "init": {
+                "title": "ABRP Telemetry - Credentials",
+                "description": "View or update your API credentials.",
+                "data": {
+                    "api_key": "ABRP API Key",
+                    "user_token": "ABRP User Token"
+                },
+                "data_description": {
+                    "api_key": "Your current API key. Edit to change.",
+                    "user_token": "Your current user token. Edit to change."
+                }
+            },
+            "options_sensors": {
                 "title": "ABRP Telemetry - Basic Settings",
                 "description": "Update your sensor mappings.\n\n**Current values:**\n{current_values}",
                 "data": {
@@ -151,6 +163,8 @@
             }
         },
         "error": {
+            "api_key_required": "API Key is required",
+            "user_token_required": "User Token is required",
             "soc_entity_required": "SOC Entity is required"
         }
     },

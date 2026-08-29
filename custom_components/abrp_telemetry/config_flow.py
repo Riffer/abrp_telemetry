@@ -384,13 +384,44 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
         return "\n".join(lines) if lines else "Keine Entitäten konfiguriert"
 
     async def async_step_init(self, user_input=None):
-        """Step 1: Basic settings and required entities."""
+        """Step 1: Credentials - show and allow updating API key and user token."""
         errors = {}
-        
+
         # Initialize _data from config_entry on first call
         if not self._data:
             self._data = dict(self.config_entry.data)
-        
+
+        if user_input is not None:
+            if not user_input.get(CONF_API_KEY):
+                errors[CONF_API_KEY] = "api_key_required"
+            elif not user_input.get(CONF_USER_TOKEN):
+                errors[CONF_USER_TOKEN] = "user_token_required"
+
+            if not errors:
+                self._data.update(user_input)
+                return await self.async_step_options_sensors()
+
+        current = self.config_entry.data
+
+        data_schema = vol.Schema({
+            vol.Required(CONF_API_KEY, default=current.get(CONF_API_KEY, "")): str,
+            vol.Required(CONF_USER_TOKEN, default=current.get(CONF_USER_TOKEN, "")): str,
+        })
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=data_schema,
+            errors=errors,
+        )
+
+    async def async_step_options_sensors(self, user_input=None):
+        """Step 2: Basic settings and required entities."""
+        errors = {}
+
+        # Initialize _data from config_entry on first call
+        if not self._data:
+            self._data = dict(self.config_entry.data)
+
         if user_input is not None:
             if not user_input.get(CONF_SOC_ENTITY):
                 errors[CONF_SOC_ENTITY] = "soc_entity_required"
@@ -457,7 +488,7 @@ class ABRPTelemetryOptionsFlow(config_entries.OptionsFlow):
                 )
 
         return self.async_show_form(
-            step_id="init",
+            step_id="options_sensors",
             data_schema=vol.Schema(schema_dict),
             errors=errors,
             description_placeholders={"current_values": current_values},
