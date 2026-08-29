@@ -97,14 +97,14 @@
         "step": {
             "init": {
                 "title": "ABRP Telemetry - Zugangsdaten",
-                "description": "Zugangsdaten anzeigen oder aktualisieren.",
+                "description": "Zugangsdaten anzeigen oder aktualisieren.\n\nDeinen Telemetrie-API-Key findest du hier:\nhttps://abetterrouteplanner.com/home/app/api-keys/telemetry",
                 "data": {
                     "api_key": "ABRP API Key",
                     "user_token": "ABRP User Token"
                 },
                 "data_description": {
-                    "api_key": "Dein aktueller API Key. Zum Ändern bearbeiten.",
-                    "user_token": "Dein aktueller User Token. Zum Ändern bearbeiten."
+                    "api_key": "Von der ABRP Telemetry API Keys Seite",
+                    "user_token": "Aus der ABRP App: Einstellungen → Auto → Generisch → Token anzeigen"
                 }
             },
             "options_sensors": {
