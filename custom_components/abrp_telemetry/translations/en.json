@@ -3,14 +3,14 @@
         "step": {
             "user": {
                 "title": "ABRP Telemetry - Credentials",
-                "description": "Configure the connection to A Better Route Planner.\n\nYou need an API key (contact contact@iternio.com) and a user token from the ABRP app.\n\n📖 [API Documentation](https://documenter.getpostman.com/view/7396339/SWTK5a8w)",
+                "description": "Configure the connection to A Better Route Planner.\n\nGet your Telemetry API key here:\nhttps://abetterrouteplanner.com/home/app/api-keys/telemetry\n\nYou also need a user token from the ABRP app.",
                 "data": {
                     "api_key": "ABRP API Key",
                     "user_token": "ABRP User Token",
                     "update_interval": "Update Interval (seconds)"
                 },
                 "data_description": {
-                    "api_key": "Obtain from Iternio (contact@iternio.com)",
+                    "api_key": "From ABRP Telemetry API Keys page",
                     "user_token": "From ABRP app: Settings → Car → Generic → Show Token",
                     "update_interval": "Recommended: 5 seconds. ABRP uses this for accurate predictions."
                 }

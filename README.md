@@ -2,7 +2,7 @@
 
 This custom integration sends telemetry data from your electric vehicle to [A Better Route Planner (ABRP)](https://abetterrouteplanner.com/).
 
-**Tested with Mercedes (mbapi2020)**, should work with any Home Assistant vehicle integration that provides the required sensor data.
+**Tested with Mercedes (mbapi2020) and Volvo (community confirmed)**, should work with any Home Assistant vehicle integration that provides the required sensor data.
 
 ## Features
 
@@ -61,11 +61,12 @@ Some vehicle integrations have API call limits that may affect telemetry frequen
 
 ## Supported Vehicle Integrations
 
-This integration is designed to work with any Home Assistant integration that provides EV telemetry data. Currently **tested with Mercedes (mbapi2020)**, but should be compatible with:
+This integration is designed to work with any Home Assistant integration that provides EV telemetry data. Currently **tested with Mercedes (mbapi2020) and Volvo (community confirmed)**, but should be compatible with:
 
 | Integration | Vehicles | Repository | Status |
 |-------------|----------|------------|--------|
 | **[Mercedes me 2020 (mbapi2020)](https://github.com/ReneNulschDE/mbapi2020)** | All Mercedes EQ models (EQA, EQB, EQC, EQE, EQS, etc.) | HACS Custom | ✅ Tested |
+| **Volvo (Home Assistant integration)** | Volvo EV/PHEV models | HA Core | ✅ Tested (community confirmed) |
 | **[PSA Car Controller](https://github.com/flobz/psa_car_controller)** | Peugeot, Citroën, Opel, DS | Standalone + [HA Addon](https://github.com/flobz/psacc-ha) | 🟡 Untested |
 | **[Hyundai/Kia Connect](https://github.com/Hyundai-Kia-Connect/kia_uvo)** | Hyundai, Kia, Genesis (Ioniq 5/6, EV6, GV60, etc.) | HACS Custom | 🟡 Untested |
 | **[Tesla Custom](https://github.com/alandtse/tesla)** | All Tesla models (Model 3, Y, S, X) | HACS Custom | 🟡 Untested |
@@ -74,7 +75,7 @@ This integration is designed to work with any Home Assistant integration that pr
 | **[Renault](https://www.home-assistant.io/integrations/renault/)** | Zoe, Megane E-Tech, etc. | HA Core | 🟡 Untested |
 | **Any other** | Any EV | — | 🟡 If SOC sensor available |
 
-> **Help wanted!** If you successfully use this integration with a vehicle other than Mercedes, please [open an issue](https://github.com/Riffer/abrp_telemetry/issues) to let us know so we can update the status.
+> **Help wanted!** If you successfully use this integration with a vehicle not yet marked as tested, please [open an issue](https://github.com/Riffer/abrp_telemetry/issues) to let us know so we can update the status.
 
 ## Quick Reference
 
@@ -153,13 +154,10 @@ The integration is robust against failures:
 
 ### 1. Get ABRP API Key
 
-You need a **free Telemetry API Key** from Iternio:
+You need a **Telemetry API Key** from ABRP:
 
-1. Visit the official API page: **[https://www.iternio.com/api](https://www.iternio.com/api)**
-2. Send an email to: **contact@iternio.com**
-3. Subject: "ABRP Telemetry API Key Request"
-4. Content: Briefly describe that you want to use the Home Assistant integration
-5. You'll typically receive the API key within 1-2 business days
+1. Open: **[https://abetterrouteplanner.com/home/app/api-keys/telemetry](https://abetterrouteplanner.com/home/app/api-keys/telemetry)**
+2. Create/copy your Telemetry API key from that page
 
 ### 2. Get User Token from ABRP
 
@@ -183,7 +181,7 @@ You need a **free Telemetry API Key** from Iternio:
 
    | Field | Description |
    |-------|-------------|
-   | **API Key** | Your Iternio API Key (from contact@iternio.com) |
+  | **API Key** | Your ABRP Telemetry API Key |
    | **User Token** | Your ABRP User Token (from the app) |
    | **Update Interval** | Seconds between uploads (5-60, default: 5) |
 
@@ -534,7 +532,7 @@ This transparent approach to AI-assisted development demonstrates how modern AI 
 | Resource | URL |
 |----------|-----|
 | **ABRP Website** | [abetterrouteplanner.com](https://abetterrouteplanner.com/) |
-| **Iternio API Info** | [iternio.com/api](https://www.iternio.com/api) |
+| **API Documentation** | [https://abetterrouteplanner.com/resources/api](https://abetterrouteplanner.com/resources/api) |
 | **Telemetry API Documentation** | [Postman Documentation](https://documenter.getpostman.com/view/7396339/SWTK5a8w) |
 | **Car Models List** | [api.iternio.com/1/tlm/get_carmodels_list](https://api.iternio.com/1/tlm/get_carmodels_list) |
 
@@ -589,4 +587,4 @@ We're looking for users with these vehicles to help improve documentation:
 | Ford Mustang Mach-E | 🟡 Untested | Integration availability |
 | Nissan Leaf/Ariya | 🟡 Untested | Entity names |
 
-✅ = Tested and documented | 🟡 = Untested, feedback welcome
+✅ = Tested (maintainer or community confirmed) | 🟡 = Untested, feedback welcome
